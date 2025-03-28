@@ -1,1 +1,0 @@
-{"scripts": {"cursor:auto": "node cursor-extensions/puppeteer-auto-monitor.js", "cursor:scan": "node cursor-extensions/puppeteer-auto-monitor.js --scan-links --depth=2"}}
