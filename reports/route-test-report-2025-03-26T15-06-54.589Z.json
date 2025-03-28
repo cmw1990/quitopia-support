@@ -1,0 +1,147 @@
+{
+  "timestamp": "2025-03-26T15:06:54.584Z",
+  "summary": {
+    "totalErrors": 107,
+    "totalWarnings": 0,
+    "routes": 6
+  },
+  "routeDetails": {
+    "/": {
+      "errors": [
+        "Failed to load resource: the server responded with a status of 400 ()",
+        "Sign in failed with status: 400 Response: JSHandle@object",
+        "Error during sign in process: JSHandle@error",
+        "AuthService: Login error: JSHandle@error",
+        "Auto-login failed: JSHandle@error",
+        "Auto-login error details: Auto-login error: Sign in failed with status 400",
+        "Auto-login failed: JSHandle@error",
+        "Auto-login error details: Auto-login error: setSession is not a function",
+        "Failed to load resource: the server responded with a status of 400 ()",
+        "Supabase REST call failed: JSHandle@error",
+        "Error fetching craving logs: JSHandle@error",
+        "Failed to load resource: the server responded with a status of 400 ()",
+        "Failed to load resource: the server responded with a status of 404 ()",
+        "Failed to load resource: the server responded with a status of 400 ()",
+        "Supabase REST API error: JSHandle@object",
+        "Supabase REST API error: JSHandle@object",
+        "Supabase REST API error: JSHandle@object",
+        "Failed to load resource: the server responded with a status of 400 ()",
+        "Supabase REST API error: JSHandle@object",
+        "Failed to load resource: the server responded with a status of 400 ()",
+        "Supabase REST API error: JSHandle@object",
+        "Failed to load resource: the server responded with a status of 404 ()",
+        "Supabase REST API error: JSHandle@object",
+        "%o\n\n%s\n\n%s\n JSHandle@error The above error occurred in the <SelectItem> component. React will try to recreate this component tree from scratch using the error boundary you provided, ErrorBoundary.",
+        "Uncaught error: JSHandle@error JSHandle@object",
+        "Failed to load resource: the server responded with a status of 404 (Not Found)",
+        "Failed to load resource: the server responded with a status of 404 (Not Found)",
+        "Failed to load resource: the server responded with a status of 404 (Not Found)",
+        "Failed to load resource: the server responded with a status of 404 (Not Found)",
+        "Failed to load resource: the server responded with a status of 404 (Not Found)",
+        "Failed to load resource: the server responded with a status of 404 (Not Found)",
+        "Failed to load resource: the server responded with a status of 404 (Not Found)",
+        "Failed to load resource: the server responded with a status of 404 (Not Found)",
+        "Failed to load resource: the server responded with a status of 404 (Not Found)",
+        "Failed to load resource: the server responded with a status of 404 ()",
+        "Supabase REST API error: JSHandle@object",
+        "Error fetching affiliate stats: JSHandle@object",
+        "Failed to load resource: the server responded with a status of 404 ()",
+        "Supabase REST API error: JSHandle@object",
+        "Error fetching affiliate stats: JSHandle@object",
+        "Failed to load resource: the server responded with a status of 404 ()",
+        "Supabase REST API error: JSHandle@object",
+        "Error fetching affiliate stats: JSHandle@object",
+        "Failed to load resource: the server responded with a status of 404 ()",
+        "Supabase REST API error: JSHandle@object",
+        "Error fetching affiliate stats: JSHandle@object",
+        "Failed to load resource: the server responded with a status of 404 ()",
+        "Supabase REST call failed: JSHandle@error",
+        "Error loading guides: JSHandle@error",
+        "Failed to load resource: the server responded with a status of 404 ()",
+        "Supabase REST call failed: JSHandle@error",
+        "Error loading guides: JSHandle@error",
+        "Failed to load resource: the server responded with a status of 404 ()",
+        "Supabase REST call failed: JSHandle@error",
+        "Error loading guides: JSHandle@error",
+        "Failed to load resource: the server responded with a status of 400 ()",
+        "Supabase REST call failed: JSHandle@error",
+        "Error loading community posts: JSHandle@error",
+        "Failed to load resource: the server responded with a status of 400 ()",
+        "Supabase REST call failed: JSHandle@error",
+        "Error loading community posts: JSHandle@error",
+        "Failed to load resource: the server responded with a status of 400 ()",
+        "Supabase REST call failed: JSHandle@error",
+        "Error loading community posts: JSHandle@error",
+        "Failed to load resource: the server responded with a status of 401 ()",
+        "Error fetching tasks: JSHandle@error",
+        "Failed to load resource: the server responded with a status of 401 ()",
+        "Error fetching tasks: JSHandle@error",
+        "Failed to load resource: the server responded with a status of 401 ()",
+        "Error fetching tasks: JSHandle@error",
+        "Error fetching challenges: JSHandle@error",
+        "Error fetching challenges: JSHandle@error",
+        "Error fetching challenges: JSHandle@error",
+        "Failed to load resource: the server responded with a status of 404 ()",
+        "Error fetching achievements: JSHandle@error",
+        "Failed to load resource: the server responded with a status of 404 ()",
+        "Error fetching achievements: JSHandle@error",
+        "Failed to load resource: the server responded with a status of 404 ()",
+        "Error fetching achievements: JSHandle@error",
+        "Failed to load resource: the server responded with a status of 404 ()",
+        "Supabase REST call failed: JSHandle@error",
+        "Error fetching journal entries: JSHandle@error",
+        "Failed to load resource: the server responded with a status of 404 ()",
+        "Supabase REST call failed: JSHandle@error",
+        "Error fetching journal entries: JSHandle@error",
+        "Failed to load resource: the server responded with a status of 404 ()",
+        "Supabase REST call failed: JSHandle@error",
+        "Error fetching journal entries: JSHandle@error",
+        "Failed to load resource: the server responded with a status of 400 ()",
+        "Supabase REST call failed: JSHandle@error",
+        "Failed to load resource: the server responded with a status of 400 ()",
+        "Supabase REST call failed: JSHandle@error",
+        "Failed to load resource: the server responded with a status of 400 ()",
+        "Supabase REST call failed: JSHandle@error",
+        "Failed to load resource: the server responded with a status of 400 ()",
+        "Supabase REST call failed: JSHandle@error",
+        "Failed to load resource: the server responded with a status of 400 ()",
+        "Supabase REST call failed: JSHandle@error",
+        "Failed to load resource: the server responded with a status of 400 ()",
+        "Supabase REST call failed: JSHandle@error",
+        "Supabase REST call failed: JSHandle@error",
+        "Supabase REST call failed: JSHandle@error"
+      ],
+      "warnings": []
+    },
+    "/app": {
+      "errors": [
+        "Navigation error: Navigation timeout of 30000 ms exceeded"
+      ],
+      "warnings": []
+    },
+    "/app/consumption-logger": {
+      "errors": [
+        "Navigation error: Navigation timeout of 30000 ms exceeded"
+      ],
+      "warnings": []
+    },
+    "/app/nrt-directory": {
+      "errors": [
+        "Navigation error: Navigation timeout of 30000 ms exceeded"
+      ],
+      "warnings": []
+    },
+    "/app/web-tools": {
+      "errors": [
+        "Navigation error: Navigation timeout of 30000 ms exceeded"
+      ],
+      "warnings": []
+    },
+    "/app/settings": {
+      "errors": [
+        "Navigation error: Navigation timeout of 30000 ms exceeded"
+      ],
+      "warnings": []
+    }
+  }
+}

@@ -1,0 +1,59 @@
+import React, { useState, useEffect } from 'react';
+import { Session } from '@supabase/supabase-js';
+import { 
+  Card, 
+  CardContent, 
+  CardHeader, 
+  CardTitle, 
+  CardDescription, 
+  CardFooter,
+  Button,
+  Tabs, 
+  TabsContent, 
+  TabsList, 
+  TabsTrigger,
+  Badge,
+  Input,
+  Label,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from './ui';
+import { supabaseRestCall } from '../api/missionFreshApiClient';
+import { useToast } from '../hooks/use-toast';
+
+// In the loadGuides function, update to:
+/*
+const loadGuides = async () => {
+  setIsLoading(true);
+  try {
+    // In a real app, this would fetch from API using supabaseRestCall
+    // const { data, error } = await supabaseRestCall({
+    //   method: 'GET',
+    //   url: '/rest/v1/guides',
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //     'Prefer': 'return=representation'
+    //   }
+    // });
+    
+    // Using mock data for now
+    setTimeout(() => {
+      setGuides(mockGuides);
+      setFilteredGuides(mockGuides);
+      setIsLoading(false);
+    }, 800);
+  } catch (error) {
+    console.error('Error loading guides:', error);
+    toast({
+      title: 'Error',
+      description: 'Failed to load guides. Please try again.',
+      variant: 'destructive',
+    });
+    setIsLoading(false);
+  }
+};
+*/
+

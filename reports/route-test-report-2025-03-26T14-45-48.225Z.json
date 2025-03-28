@@ -1,0 +1,165 @@
+{
+  "timestamp": "2025-03-26T14:45:48.214Z",
+  "summary": {
+    "totalErrors": 45,
+    "totalWarnings": 0,
+    "routes": 22
+  },
+  "routeDetails": {
+    "/": {
+      "errors": [
+        "The requested module '/node_modules/.vite/deps/react-router-dom.js?v=6af790df' does not provide an export named 'navigate'",
+        "The requested module '/node_modules/.vite/deps/react-router-dom.js?v=6af790df' does not provide an export named 'navigate'",
+        "Navigation error: page.waitForTimeout is not a function",
+        "The requested module '/node_modules/.vite/deps/react-router-dom.js?v=6af790df' does not provide an export named 'navigate'",
+        "The requested module '/node_modules/.vite/deps/react-router-dom.js?v=6af790df' does not provide an export named 'navigate'",
+        "The requested module '/node_modules/.vite/deps/react-router-dom.js?v=6af790df' does not provide an export named 'navigate'",
+        "The requested module '/node_modules/.vite/deps/react-router-dom.js?v=6af790df' does not provide an export named 'navigate'",
+        "The requested module '/node_modules/.vite/deps/react-router-dom.js?v=6af790df' does not provide an export named 'navigate'",
+        "The requested module '/node_modules/.vite/deps/react-router-dom.js?v=6af790df' does not provide an export named 'navigate'",
+        "The requested module '/node_modules/.vite/deps/react-router-dom.js?v=6af790df' does not provide an export named 'navigate'",
+        "The requested module '/node_modules/.vite/deps/react-router-dom.js?v=6af790df' does not provide an export named 'navigate'",
+        "The requested module '/node_modules/.vite/deps/react-router-dom.js?v=6af790df' does not provide an export named 'navigate'",
+        "The requested module '/node_modules/.vite/deps/react-router-dom.js?v=6af790df' does not provide an export named 'navigate'",
+        "The requested module '/node_modules/.vite/deps/react-router-dom.js?v=6af790df' does not provide an export named 'navigate'",
+        "The requested module '/node_modules/.vite/deps/react-router-dom.js?v=6af790df' does not provide an export named 'navigate'",
+        "The requested module '/node_modules/.vite/deps/react-router-dom.js?v=6af790df' does not provide an export named 'navigate'",
+        "The requested module '/node_modules/.vite/deps/react-router-dom.js?v=6af790df' does not provide an export named 'navigate'",
+        "The requested module '/node_modules/.vite/deps/react-router-dom.js?v=6af790df' does not provide an export named 'navigate'",
+        "The requested module '/node_modules/.vite/deps/react-router-dom.js?v=6af790df' does not provide an export named 'navigate'",
+        "The requested module '/node_modules/.vite/deps/react-router-dom.js?v=6af790df' does not provide an export named 'navigate'",
+        "The requested module '/node_modules/.vite/deps/react-router-dom.js?v=6af790df' does not provide an export named 'navigate'",
+        "The requested module '/node_modules/.vite/deps/react-router-dom.js?v=6af790df' does not provide an export named 'navigate'",
+        "The requested module '/node_modules/.vite/deps/react-router-dom.js?v=6af790df' does not provide an export named 'navigate'",
+        "The requested module '/node_modules/.vite/deps/react-router-dom.js?v=6af790df' does not provide an export named 'navigate'"
+      ],
+      "warnings": []
+    },
+    "/auth": {
+      "errors": [
+        "Navigation error: page.waitForTimeout is not a function"
+      ],
+      "warnings": []
+    },
+    "/app": {
+      "errors": [
+        "Navigation error: page.waitForTimeout is not a function"
+      ],
+      "warnings": []
+    },
+    "/app/dashboard": {
+      "errors": [
+        "Navigation error: page.waitForTimeout is not a function"
+      ],
+      "warnings": []
+    },
+    "/app/progress": {
+      "errors": [
+        "Navigation error: page.waitForTimeout is not a function"
+      ],
+      "warnings": []
+    },
+    "/app/consumption-logger": {
+      "errors": [
+        "Navigation error: page.waitForTimeout is not a function"
+      ],
+      "warnings": []
+    },
+    "/app/nrt-directory": {
+      "errors": [
+        "Navigation error: page.waitForTimeout is not a function"
+      ],
+      "warnings": []
+    },
+    "/app/alternative-products": {
+      "errors": [
+        "Navigation error: page.waitForTimeout is not a function"
+      ],
+      "warnings": []
+    },
+    "/app/guides": {
+      "errors": [
+        "Navigation error: page.waitForTimeout is not a function"
+      ],
+      "warnings": []
+    },
+    "/app/web-tools": {
+      "errors": [
+        "Navigation error: page.waitForTimeout is not a function"
+      ],
+      "warnings": []
+    },
+    "/app/community": {
+      "errors": [
+        "Navigation error: page.waitForTimeout is not a function"
+      ],
+      "warnings": []
+    },
+    "/app/settings": {
+      "errors": [
+        "Navigation error: page.waitForTimeout is not a function"
+      ],
+      "warnings": []
+    },
+    "/app/task-manager": {
+      "errors": [
+        "Navigation error: page.waitForTimeout is not a function"
+      ],
+      "warnings": []
+    },
+    "/app/trigger-analysis": {
+      "errors": [
+        "Navigation error: page.waitForTimeout is not a function"
+      ],
+      "warnings": []
+    },
+    "/app/challenges": {
+      "errors": [
+        "Navigation error: page.waitForTimeout is not a function"
+      ],
+      "warnings": []
+    },
+    "/app/achievements": {
+      "errors": [
+        "Navigation error: page.waitForTimeout is not a function"
+      ],
+      "warnings": []
+    },
+    "/app/journal": {
+      "errors": [
+        "Navigation error: page.waitForTimeout is not a function"
+      ],
+      "warnings": []
+    },
+    "/app/analytics": {
+      "errors": [
+        "Navigation error: page.waitForTimeout is not a function"
+      ],
+      "warnings": []
+    },
+    "/app/health/dashboard": {
+      "errors": [
+        "Navigation error: page.waitForTimeout is not a function"
+      ],
+      "warnings": []
+    },
+    "/app/health/mood": {
+      "errors": [
+        "Navigation error: page.waitForTimeout is not a function"
+      ],
+      "warnings": []
+    },
+    "/app/health/energy": {
+      "errors": [
+        "Navigation error: page.waitForTimeout is not a function"
+      ],
+      "warnings": []
+    },
+    "/app/health/focus": {
+      "errors": [
+        "Navigation error: page.waitForTimeout is not a function"
+      ],
+      "warnings": []
+    }
+  }
+}

@@ -1,0 +1,65 @@
+google/gemini-2.0-pro-exp-02-05th
+{
+  "summary": {
+    "totalErrors": 5,
+    "urlsWithErrors": 5,
+    "timestamp": "2025-03-26T20:49:18.799Z"
+  },
+  "errorsByUrl": {
+    "http://localhost:5001/": [
+      {
+        "type": "error",
+        "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+        "location": {
+          "url": "http://localhost:5001/",
+          "timestamp": "2025-03-26T20:49:03.643Z"
+        },
+        "browser": "puppeteer-auto"
+      }
+    ],
+    "http://localhost:5001/auth": [
+      {
+        "type": "error",
+        "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+        "location": {
+          "url": "http://localhost:5001/auth",
+          "timestamp": "2025-03-26T20:49:06.643Z"
+        },
+        "browser": "puppeteer-auto"
+      }
+    ],
+    "http://localhost:5001/app": [
+      {
+        "type": "error",
+        "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+        "location": {
+          "url": "http://localhost:5001/app",
+          "timestamp": "2025-03-26T20:49:09.738Z"
+        },
+        "browser": "puppeteer-auto"
+      }
+    ],
+    "http://localhost:5001/app/dashboard": [
+      {
+        "type": "error",
+        "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+        "location": {
+          "url": "http://localhost:5001/app/dashboard",
+          "timestamp": "2025-03-26T20:49:12.918Z"
+        },
+        "browser": "puppeteer-auto"
+      }
+    ],
+    "http://localhost:5001/app/progress": [
+      {
+        "type": "error",
+        "message": "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+        "location": {
+          "url": "http://localhost:5001/app/progress",
+          "timestamp": "2025-03-26T20:49:15.883Z"
+        },
+        "browser": "puppeteer-auto"
+      }
+    ]
+  }
+}

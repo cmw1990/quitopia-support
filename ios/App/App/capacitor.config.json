@@ -1,0 +1,48 @@
+{
+	"appId": "com.wellcharged.missionfresh",
+	"appName": "Mission Fresh",
+	"webDir": "dist",
+	"server": {
+		"androidScheme": "https",
+		"cleartext": true,
+		"allowNavigation": [
+			"*"
+		]
+	},
+	"plugins": {
+		"SplashScreen": {
+			"launchShowDuration": 2000,
+			"backgroundColor": "#166534",
+			"androidSplashResourceName": "splash",
+			"androidScaleType": "CENTER_CROP"
+		},
+		"StatusBar": {
+			"style": "DARK",
+			"backgroundColor": "#166534",
+			"overlaysWebView": true
+		},
+		"Keyboard": {
+			"resize": "body",
+			"style": "DARK",
+			"resizeOnFullScreen": true
+		},
+		"App": {
+			"appUrl": "https://mission-fresh.wellcharged.com",
+			"serverUrl": "https://mission-fresh.wellcharged.com"
+		}
+	},
+	"ios": {
+		"contentInset": "always",
+		"backgroundColor": "#166534",
+		"preferredContentMode": "mobile"
+	},
+	"android": {
+		"backgroundColor": "#166534",
+		"allowMixedContent": true
+	},
+	"packageClassList": [
+		"KeyboardPlugin",
+		"SplashScreenPlugin",
+		"StatusBarPlugin"
+	]
+}

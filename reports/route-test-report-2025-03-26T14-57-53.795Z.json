@@ -1,0 +1,38 @@
+{
+  "timestamp": "2025-03-26T14:57:53.790Z",
+  "summary": {
+    "totalErrors": 23,
+    "totalWarnings": 0,
+    "routes": 1
+  },
+  "routeDetails": {
+    "/": {
+      "errors": [
+        "The requested module '/node_modules/.vite/deps/react-router-dom.js?v=6af790df' does not provide an export named 'navigate'",
+        "The requested module '/node_modules/.vite/deps/react-router-dom.js?v=6af790df' does not provide an export named 'navigate'",
+        "The requested module '/node_modules/.vite/deps/react-router-dom.js?v=6af790df' does not provide an export named 'navigate'",
+        "The requested module '/node_modules/.vite/deps/react-router-dom.js?v=6af790df' does not provide an export named 'navigate'",
+        "The requested module '/node_modules/.vite/deps/react-router-dom.js?v=6af790df' does not provide an export named 'navigate'",
+        "The requested module '/node_modules/.vite/deps/react-router-dom.js?v=6af790df' does not provide an export named 'navigate'",
+        "The requested module '/node_modules/.vite/deps/react-router-dom.js?v=6af790df' does not provide an export named 'navigate'",
+        "The requested module '/node_modules/.vite/deps/react-router-dom.js?v=6af790df' does not provide an export named 'navigate'",
+        "The requested module '/node_modules/.vite/deps/react-router-dom.js?v=6af790df' does not provide an export named 'navigate'",
+        "The requested module '/node_modules/.vite/deps/react-router-dom.js?v=6af790df' does not provide an export named 'navigate'",
+        "The requested module '/node_modules/.vite/deps/react-router-dom.js?v=6af790df' does not provide an export named 'navigate'",
+        "The requested module '/node_modules/.vite/deps/react-router-dom.js?v=6af790df' does not provide an export named 'navigate'",
+        "The requested module '/node_modules/.vite/deps/react-router-dom.js?v=6af790df' does not provide an export named 'navigate'",
+        "The requested module '/node_modules/.vite/deps/react-router-dom.js?v=6af790df' does not provide an export named 'navigate'",
+        "The requested module '/node_modules/.vite/deps/react-router-dom.js?v=6af790df' does not provide an export named 'navigate'",
+        "The requested module '/node_modules/.vite/deps/react-router-dom.js?v=6af790df' does not provide an export named 'navigate'",
+        "The requested module '/node_modules/.vite/deps/react-router-dom.js?v=6af790df' does not provide an export named 'navigate'",
+        "The requested module '/node_modules/.vite/deps/react-router-dom.js?v=6af790df' does not provide an export named 'navigate'",
+        "The requested module '/node_modules/.vite/deps/react-router-dom.js?v=6af790df' does not provide an export named 'navigate'",
+        "The requested module '/node_modules/.vite/deps/react-router-dom.js?v=6af790df' does not provide an export named 'navigate'",
+        "The requested module '/node_modules/.vite/deps/react-router-dom.js?v=6af790df' does not provide an export named 'navigate'",
+        "The requested module '/node_modules/.vite/deps/react-router-dom.js?v=6af790df' does not provide an export named 'navigate'",
+        "The requested module '/node_modules/.vite/deps/react-router-dom.js?v=6af790df' does not provide an export named 'navigate'"
+      ],
+      "warnings": []
+    }
+  }
+}

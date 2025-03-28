@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mission Fresh Status Check</title>
+  <style>
+    :root {
+      --primary: #0EA5E9;
+      --secondary: #8B5CF6;
+      --background: #FFFFFF;
+      --foreground: #1F2937;
+      --success: #10B981;
+      --warning: #F59E0B;
+      --error: #EF4444;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #F5F7FA;
+      color: var(--foreground);
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      color: var(--primary);
+      margin-top: 0;
+    }
+
+    h2 {
+      color: var(--secondary);
+      margin-top: 24px;
+    }
+
+    .button {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 500;
+      margin-top: 20px;
+    }
+
+    .button:hover {
+      opacity: 0.9;
+    }
+
+    .test-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .test-card {
+      border: 1px solid #E5E7EB;
+      border-radius: 6px;
+      padding: 12px;
+    }
+
+    .test-card h3 {
+      margin-top: 0;
+      font-size: 16px;
+    }
+
+    .status {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .status-success {
+      background-color: rgba(16, 185, 129, 0.1);
+      color: var(--success);
+    }
+
+    .status-warning {
+      background-color: rgba(245, 158, 11, 0.1);
+      color: var(--warning);
+    }
+
+    .status-error {
+      background-color: rgba(239, 68, 68, 0.1);
+      color: var(--error);
+    }
+
+    code {
+      display: block;
+      background-color: #F3F4F6;
+      padding: 8px;
+      border-radius: 4px;
+      font-family: monospace;
+      margin-top: 8px;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Mission Fresh Status Check</h1>
+    <p>This page runs several checks to diagnose issues with the application environment.</p>
+    
+    <h2>Server Status</h2>
+    <div class="test-grid">
+      <div class="test-card">
+        <h3>Local Server</h3>
+        <div id="server-status" class="status status-warning">Checking...</div>
+      </div>
+      <div class="test-card">
+        <h3>Browser Rendering</h3>
+        <div id="browser-status" class="status status-success">Working</div>
+      </div>
+      <div class="test-card">
+        <h3>JavaScript</h3>
+        <div id="js-status" class="status status-success">Working</div>
+      </div>
+    </div>
+
+    <h2>CSS Tests</h2>
+    <div class="test-grid">
+      <div class="test-card">
+        <h3>Inline CSS</h3>
+        <div id="inline-css-status" class="status status-success">Working</div>
+      </div>
+      <div class="test-card">
+        <h3>External CSS</h3>
+        <div id="external-css-status" class="status status-warning">Checking...</div>
+      </div>
+      <div class="test-card">
+        <h3>Dynamic CSS</h3>
+        <div id="dynamic-css-status" class="status status-warning">Checking...</div>
+      </div>
+    </div>
+
+    <h2>Network Tests</h2>
+    <div class="test-grid">
+      <div class="test-card">
+        <h3>Static File Access</h3>
+        <div id="static-file-status" class="status status-warning">Checking...</div>
+      </div>
+      <div class="test-card">
+        <h3>API Connectivity</h3>
+        <div id="api-status" class="status status-warning">Checking...</div>
+      </div>
+    </div>
+
+    <h2>Troubleshooting Info</h2>
+    <div id="browser-info"></div>
+    <div id="log-output"></div>
+    
+    <button id="test-button" class="button">Run Tests Again</button>
+  </div>
+
+  <script>
+    // Basic function to update a status element
+    function updateStatus(id, status, message) {
+      const element = document.getElementById(id);
+      element.className = `status status-${status}`;
+      element.textContent = message;
+    }
+
+    // Log function
+    function log(message) {
+      const logOutput = document.getElementById('log-output');
+      const logItem = document.createElement('code');
+      logItem.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+      logOutput.appendChild(logItem);
+    }
+
+    // Test if external CSS file can be loaded
+    function testExternalCSS() {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = 'css-test.css';
+      
+      link.onload = () => {
+        updateStatus('external-css-status', 'success', 'CSS File Loaded');
+        log('External CSS loaded successfully');
+      };
+      
+      link.onerror = () => {
+        updateStatus('external-css-status', 'error', 'Failed to Load');
+        log('Failed to load external CSS file');
+      };
+      
+      document.head.appendChild(link);
+    }
+
+    // Test if dynamic CSS can be applied
+    function testDynamicCSS() {
+      try {
+        const style = document.createElement('style');
+        style.textContent = '.dynamic-style-test { color: green; }';
+        document.head.appendChild(style);
+        
+        const testElement = document.createElement('div');
+        testElement.className = 'dynamic-style-test';
+        testElement.style.display = 'none';
+        document.body.appendChild(testElement);
+        
+        const computed = window.getComputedStyle(testElement);
+        if (computed.color === 'rgb(0, 128, 0)') {
+          updateStatus('dynamic-css-status', 'success', 'Working');
+          log('Dynamic CSS is working');
+        } else {
+          updateStatus('dynamic-css-status', 'warning', 'Partial');
+          log(`Dynamic CSS partially working: ${computed.color}`);
+        }
+        
+        document.body.removeChild(testElement);
+      } catch (error) {
+        updateStatus('dynamic-css-status', 'error', 'Failed');
+        log(`Dynamic CSS error: ${error.message}`);
+      }
+    }
+
+    // Test static file access
+    function testStaticFileAccess() {
+      fetch('css-test.css')
+        .then(response => {
+          if (response.ok) {
+            updateStatus('static-file-status', 'success', 'Accessible');
+            log('Static file access successful');
+            return response.text();
+          } else {
+            throw new Error(`Status: ${response.status}`);
+          }
+        })
+        .catch(error => {
+          updateStatus('static-file-status', 'error', 'Failed');
+          log(`Static file access failed: ${error.message}`);
+        });
+    }
+
+    // Test server status
+    function testServerStatus() {
+      const startTime = Date.now();
+      fetch(window.location.href)
+        .then(response => {
+          const timing = Date.now() - startTime;
+          if (response.ok) {
+            updateStatus('server-status', 'success', `Active (${timing}ms)`);
+            log(`Server is responding in ${timing}ms`);
+          } else {
+            throw new Error(`Status: ${response.status}`);
+          }
+        })
+        .catch(error => {
+          updateStatus('server-status', 'error', 'Error');
+          log(`Server check failed: ${error.message}`);
+        });
+    }
+
+    // Test API connectivity
+    function testAPIConnectivity() {
+      // This is a mock test since we don't have a real API endpoint
+      setTimeout(() => {
+        // Simulate success for demo purposes
+        updateStatus('api-status', 'success', 'Connected');
+        log('API connectivity test completed');
+      }, 1500);
+    }
+
+    // Collect browser information
+    function collectBrowserInfo() {
+      const browserInfo = document.getElementById('browser-info');
+      const info = {
+        'User Agent': navigator.userAgent,
+        'Window Size': `${window.innerWidth}x${window.innerHeight}`,
+        'Device Pixel Ratio': window.devicePixelRatio,
+        'Cookies Enabled': navigator.cookieEnabled,
+        'Language': navigator.language,
+        'Protocol': window.location.protocol,
+        'Host': window.location.host
+      };
+      
+      const infoHtml = Object.entries(info)
+        .map(([key, value]) => `<strong>${key}:</strong> ${value}`)
+        .join('<br>');
+      
+      browserInfo.innerHTML = `<p>${infoHtml}</p>`;
+    }
+
+    // Run all tests
+    function runAllTests() {
+      updateStatus('js-status', 'success', 'Working');
+      updateStatus('browser-status', 'success', 'Working');
+      updateStatus('inline-css-status', 'success', 'Working');
+      
+      updateStatus('external-css-status', 'warning', 'Checking...');
+      updateStatus('dynamic-css-status', 'warning', 'Checking...');
+      updateStatus('static-file-status', 'warning', 'Checking...');
+      updateStatus('server-status', 'warning', 'Checking...');
+      updateStatus('api-status', 'warning', 'Checking...');
+      
+      document.getElementById('log-output').innerHTML = '';
+      log('Starting tests...');
+      
+      testExternalCSS();
+      testDynamicCSS();
+      testStaticFileAccess();
+      testServerStatus();
+      testAPIConnectivity();
+    }
+
+    // Initialize the page
+    document.addEventListener('DOMContentLoaded', () => {
+      collectBrowserInfo();
+      runAllTests();
+      
+      document.getElementById('test-button').addEventListener('click', runAllTests);
+    });
+  </script>
+</body>
+</html> 

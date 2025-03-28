@@ -1,0 +1,104 @@
+{
+  "summary": {
+    "totalErrors": 12,
+    "timestamp": "2025-03-26T16:22:41.062Z"
+  },
+  "errors": [
+    {
+      "type": "navigation",
+      "message": "Navigation error: page.waitForTimeout is not a function",
+      "location": {
+        "url": "http://localhost:5001/app/dashboard",
+        "timestamp": "2025-03-26T16:22:27.284Z"
+      }
+    },
+    {
+      "type": "navigation",
+      "message": "Navigation error: page.waitForTimeout is not a function",
+      "location": {
+        "url": "http://localhost:5001/app/progress",
+        "timestamp": "2025-03-26T16:22:28.389Z"
+      }
+    },
+    {
+      "type": "navigation",
+      "message": "Navigation error: page.waitForTimeout is not a function",
+      "location": {
+        "url": "http://localhost:5001/app/health-improvement",
+        "timestamp": "2025-03-26T16:22:29.370Z"
+      }
+    },
+    {
+      "type": "navigation",
+      "message": "Navigation error: page.waitForTimeout is not a function",
+      "location": {
+        "url": "http://localhost:5001/app/nrt-directory",
+        "timestamp": "2025-03-26T16:22:30.333Z"
+      }
+    },
+    {
+      "type": "navigation",
+      "message": "Navigation error: page.waitForTimeout is not a function",
+      "location": {
+        "url": "http://localhost:5001/app/alternative-products",
+        "timestamp": "2025-03-26T16:22:31.318Z"
+      }
+    },
+    {
+      "type": "navigation",
+      "message": "Navigation error: page.waitForTimeout is not a function",
+      "location": {
+        "url": "http://localhost:5001/app/guides",
+        "timestamp": "2025-03-26T16:22:32.386Z"
+      }
+    },
+    {
+      "type": "navigation",
+      "message": "Navigation error: page.waitForTimeout is not a function",
+      "location": {
+        "url": "http://localhost:5001/app/community",
+        "timestamp": "2025-03-26T16:22:33.600Z"
+      }
+    },
+    {
+      "type": "navigation",
+      "message": "Navigation error: page.waitForTimeout is not a function",
+      "location": {
+        "url": "http://localhost:5001/app/profile",
+        "timestamp": "2025-03-26T16:22:34.833Z"
+      }
+    },
+    {
+      "type": "navigation",
+      "message": "Navigation error: page.waitForTimeout is not a function",
+      "location": {
+        "url": "http://localhost:5001/app/settings",
+        "timestamp": "2025-03-26T16:22:36.953Z"
+      }
+    },
+    {
+      "type": "navigation",
+      "message": "Navigation error: page.waitForTimeout is not a function",
+      "location": {
+        "url": "http://localhost:5001/app/reports",
+        "timestamp": "2025-03-26T16:22:38.558Z"
+      }
+    },
+    {
+      "type": "navigation",
+      "message": "Navigation error: page.waitForTimeout is not a function",
+      "location": {
+        "url": "http://localhost:5001/app/notifications",
+        "timestamp": "2025-03-26T16:22:39.999Z"
+      }
+    },
+    {
+      "type": "navigation",
+      "message": "Navigation error: page.waitForTimeout is not a function",
+      "location": {
+        "url": "http://localhost:5001/app/web-tools",
+        "timestamp": "2025-03-26T16:22:41.062Z"
+      }
+    }
+  ]
+}

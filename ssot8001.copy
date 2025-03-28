@@ -1,0 +1,726 @@
+# WELL-CHARGED: SINGLE SOURCE OF TRUTH (SSOT8001)
+
+**THIS IS THE MASTER SSOT FILE FOR THE ENTIRE WELL-CHARGED APP AND ALL SUB-APPS. THIS IS THE SSOT OF ALL SSOTS.**
+
+## Table of Contents
+1. [Platform Overview](#platform-overview)
+2. [Platform Architecture](#platform-architecture)
+3. [REST API Policy](#rest-api-policy)
+4. [Authentication System](#authentication-system)
+5. [Database Infrastructure](#database-infrastructure)
+6. [Routing & Navigation Strategy](#routing--navigation-strategy)
+7. [Micro-Frontend Applications](#micro-frontend-applications)
+8. [Development Guidelines](#development-guidelines)
+9. [Data Management Guidelines](#data-management-guidelines)
+10. [Security Best Practices](#security-best-practices)
+
+---
+
+## Platform Overview
+
+### Core Purpose
+Well-Charged is a revolutionary all-in-one wellness platform that transforms how people manage their energy and performance. Unlike traditional single-focus apps, it provides a comprehensive ecosystem for optimizing all aspects of human energy - physical, mental, emotional, and social.
+
+### Platform Philosophy
+Built on three core pillars:
+1. **Holistic Integration**: Every aspect of energy is interconnected
+2. **Scientific Approach**: Evidence-based methodologies and tracking
+3. **Personalized Optimization**: AI-driven insights and recommendations
+
+### Key Differentiators
+- **Holistic Integration**: All wellness aspects are interconnected, showing how each component affects overall energy levels
+- **Unified Dashboard**: Single source of truth for all wellness metrics and activities
+- **Cross-Category Analysis**: AI-powered insights showing relationships between different wellness aspects
+- **Comprehensive Coverage**: Complete suite of tools covering all aspects of energy management and wellness
+- **Microapp Architecture**: Independent yet integrated applications providing specialized functionality
+
+## Platform Architecture
+
+### Platform Categories
+
+Well-Charged is architected as a collection of platforms, each serving specific needs:
+
+1. **Marketing Platform** (`/`)
+   - Public-facing content
+   - Marketing pages
+   - Landing pages
+   - Blog posts
+
+2. **WebApp Platform** (`/webapp/*`)
+   - Web application for desktop and mobile browsers
+   - Full feature set
+   - Dashboard and analytics
+
+3. **Mobile App Platform** (`/mobileapp/*`)
+   - Native mobile application views
+   - Optimized for touch interfaces
+   - Push notifications
+
+4. **PC App Platform** (`/pcapp/*`)
+   - Desktop application views
+   - Advanced productivity features
+   - File system integration
+
+5. **Browser Extension Platform** (`/ext/*`)
+   - Lightweight browser extension views
+   - Focus tools
+   - Site blocking
+
+## REST API Policy
+
+**IMPORTANT DECLARATION - MANDATORY REST API APPROACH**
+
+### Policy Statement
+
+**Under NO circumstances should this application EVER use Supabase client methods.**
+
+All interaction with the Supabase backend MUST follow these mandatory guidelines:
+
+1. **ALL database queries MUST use direct REST API calls** to the appropriate endpoints
+2. **ALL authentication flows MUST use direct REST API calls** instead of Supabase client auth methods
+3. **ALL storage operations MUST use direct REST API calls** to the storage endpoints
+4. **ALL real-time subscriptions MUST use WebSockets directly** instead of Supabase client subscription methods
+
+### Implementation Details
+
+- Direct REST API calls are implemented through the `supabaseRestCall` helper function
+- REST API interfaces maintain API compatibility with previous code through compatibility layers
+- All database operations should use functions exported from the REST API client modules
+- Local authentication tokens are stored in localStorage for session persistence
+
+### Benefits of REST API Approach
+
+- Complete control over network requests and error handling
+- No dependency on third-party client libraries that may have inconsistent behavior
+- Better performance through reduced overhead
+- Simplified debugging and maintenance
+
+### Type Imports Exception
+
+It is acceptable to import **ONLY TYPES** from '@supabase/supabase-js' for TypeScript type definitions, but **NEVER** import or use any actual client functionality.
+
+### Reference Implementation
+
+```typescript
+// Helper for making Supabase REST API calls
+const supabaseRestCall = async (endpoint: string, options: RequestInit = {}, session?: { access_token: string } | null) => {
+  const response = await fetch(`${SUPABASE_URL}${endpoint}`, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${session?.access_token || SUPABASE_KEY}`,
+      ...options.headers
+    }
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || response.statusText);
+  }
+
+  return await response.json();
+};
+```
+
+## Authentication System
+
+### Authentication Flow
+
+1. User signs up or logs in through the `/auth` page
+2. Authentication is handled through direct REST API calls to Supabase Auth endpoints
+3. JWT tokens are issued upon successful authentication
+4. The application checks for an active session before connecting to the database
+5. Database operations use Row Level Security (RLS) to enforce access control
+
+### Account Types
+
+#### Regular User Accounts
+- Created through standard signup process
+- Email verification required
+- Personal data stored securely in user-specific tables
+
+#### Development Test Account
+- Email: superwellcharged@gmail.com
+- Used for development and testing purposes only
+- Keep test data isolated from production
+
+#### Demo User Account
+- Email: hertzofhopes@gmail.com
+- Password: J4913836j
+- Used for all demos and presentations
+- Contains real data stored in this user's actual data tables
+- NEVER use frontend mock data when presenting with this account
+
+### Security Guidelines
+
+1. **Session Management**
+   - JWT tokens expire after 1 hour
+   - Refresh tokens handled automatically
+   - Sessions invalidated on security events
+
+2. **Password Security**
+   - Strong password requirements enforced
+   - Passwords hashed securely by Supabase
+   - Password reset flow available
+
+3. **Access Control**
+   - Row Level Security (RLS) enforced at database level
+   - User-specific data access controls
+   - Role-based permissions for admin features
+
+4. **Authentication UX**
+   - Clear error messages for authentication issues
+   - Smooth onboarding flow
+   - Password reset and account recovery
+
+## Database Infrastructure
+
+### Supabase Integration
+
+Well-Charged uses Supabase as its primary database and authentication provider. All interactions with Supabase must follow the REST API-only policy.
+
+### Supabase Connection Details
+
+**CRITICAL: These connection details MUST be used consistently across all applications.**
+
+```
+SUPABASE_URL=https://zoubqdwxemivxrjruvam.supabase.co
+SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpvdWJxZHd4ZW1pdnhyanJ1dmFtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg0MjAxOTcsImV4cCI6MjA1Mzk5NjE5N30.tq2ssOiA8CbFUZc6HXWXMEev1dODzKZxzNrpvyzbbXs
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpvdWJxZHd4ZW1pdnhyanJ1dmFtIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczODQyMDE5NywiZXhwIjoyMDUzOTk2MTk3fQ.VMGEmVXub9PA-lQiE4b1XJu-dqjdUq1UpqVnppynYFw
+```
+
+These credentials MUST be stored securely and NEVER committed to version control, except within this SSOT document.
+
+### Environment Setup
+
+For local development, store these values in `.env.local`:
+
+```bash
+VITE_SUPABASE_URL=https://zoubqdwxemivxrjruvam.supabase.co
+VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpvdWJxZHd4ZW1pdnhyanJ1dmFtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg0MjAxOTcsImV4cCI6MjA1Mzk5NjE5N30.tq2ssOiA8CbFUZc6HXWXMEev1dODzKZxzNrpvyzbbXs
+```
+
+For migrations and administrative operations, use:
+
+```bash
+export SUPABASE_URL=https://zoubqdwxemivxrjruvam.supabase.co
+export SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpvdWJxZHd4ZW1pdnhyanJ1dmFtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg0MjAxOTcsImV4cCI6MjA1Mzk5NjE5N30.tq2ssOiA8CbFUZc6HXWXMEev1dODzKZxzNrpvyzbbXs
+export SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpvdWJxZHd4ZW1pdnhyanJ1dmFtIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczODQyMDE5NywiZXhwIjoyMDUzOTk2MTk3fQ.VMGEmVXub9PA-lQiE4b1XJu-dqjdUq1UpqVnppynYFw
+```
+
+### Database Migration Best Practices
+
+**CRITICAL: Well-Charged uses direct REST API calls for migrations, NOT the Supabase CLI.**
+
+The migration approach in Well-Charged prioritizes:
+
+1. **Direct Control**: Full control over migration execution
+2. **Simplicity**: No additional tools or dependencies
+3. **Consistency**: Uniform approach across all environments
+4. **Traceability**: Clear tracking of applied migrations
+5. **Security**: Proper handling of service role credentials
+
+### Migration Process
+
+All migrations must follow this standardized process:
+
+1. **Migration Files**: 
+   - Store in `supabase/migrations/` directory
+   - Use sequential numbering: `00001_create_user_stats.sql`, `00002_create_health_milestones.sql`
+   - Include detailed SQL comments explaining changes
+   - Make migrations idempotent (safe to run multiple times)
+   - Use table names with suffix "8" (e.g., `user_stats8`)
+
+2. **Migration Tracking**:
+   - Migrations are tracked in a `migrations` table
+   - Table schema: `id, name, applied_at`
+   - Check if migration is already applied before execution
+
+3. **Execution Method**:
+   - Use direct REST API calls with service role key
+   - Do NOT use Supabase CLI or client libraries
+   - Example migration execution:
+
+```bash
+# Create migrations tracking table
+curl -X POST "${SUPABASE_URL}/rest/v1/sql" \
+  -H "apikey: ${SUPABASE_SERVICE_ROLE_KEY}" \
+  -H "Authorization: Bearer ${SUPABASE_SERVICE_ROLE_KEY}" \
+  -H "Content-Type: application/json" \
+  -d '{"query": "CREATE TABLE IF NOT EXISTS migrations (id SERIAL PRIMARY KEY, name VARCHAR(255) NOT NULL UNIQUE, applied_at TIMESTAMP WITH TIME ZONE DEFAULT now());"}'
+
+# Execute migration file
+curl -X POST "${SUPABASE_URL}/rest/v1/sql" \
+  -H "apikey: ${SUPABASE_SERVICE_ROLE_KEY}" \
+  -H "Authorization: Bearer ${SUPABASE_SERVICE_ROLE_KEY}" \
+  -H "Content-Type: application/json" \
+  -d '{"query": "'"$(cat supabase/migrations/00001_create_user_stats.sql | tr '\\n' ' ')"'"}'
+
+# Record migration as applied
+curl -X POST "${SUPABASE_URL}/rest/v1/migrations" \
+  -H "apikey: ${SUPABASE_SERVICE_ROLE_KEY}" \
+  -H "Authorization: Bearer ${SUPABASE_SERVICE_ROLE_KEY}" \
+  -H "Content-Type: application/json" \
+  -H "Prefer: return=minimal" \
+  -d '{"name": "00001_create_user_stats.sql"}'
+```
+
+### Table Naming Convention
+
+All new tables MUST use the suffix "8" (e.g., `user_stats8`, `health_milestones8`). This convention:
+
+1. Clearly identifies tables as part of the new schema
+2. Prevents conflicts with legacy tables
+3. Simplifies migration and maintenance
+4. Ensures consistent naming across the application
+
+### Key Tables
+
+1. **User Data Tables**
+   - `energy_tracking8`: Energy level tracking
+   - `sleep_tracking8`: Sleep metrics
+   - `nutrition_tracking8`: Nutrition data
+   - `workout_tracking8`: Exercise data
+   - `focus_sessions8`: Focus metrics
+   - `meditation_sessions8`: Meditation data
+
+2. **Application Tables**
+   - `care_groups`: Care connector groups
+   - `care_group_members`: Group membership
+   - `care_tasks`: Tasks assigned in care groups
+   - `energy_plans`: Energy optimization plans
+
+### Database Access Pattern
+
+1. All database queries are performed through REST API calls
+2. Row Level Security (RLS) is implemented at the database level
+3. Each user can only access their own data through RLS policies
+4. Shared data (like group information) has specific access rules
+
+### Data Models
+
+Each core feature has its own data model with standardized fields:
+
+1. **User Model**
+   - UUID primary key
+   - Email address
+   - Profile information
+   - Preferences
+
+2. **Activity Models**
+   - UUID primary key
+   - User ID foreign key
+   - Timestamp
+   - Activity-specific data
+   - Optional metadata
+
+3. **Goal Models**
+   - UUID primary key
+   - User ID foreign key
+   - Target metrics
+   - Timeline data
+   - Progress tracking
+
+## Routing & Navigation Strategy
+
+### **CRITICAL: App-Specific Authentication and Navigation**
+
+Each application in the Well-Charged ecosystem MUST maintain its own separate authentication flow and navigation structure. This is a MANDATORY requirement that should NEVER be violated:
+
+1. **App-Specific Authentication Paths**:
+   - Main Well-Charged authentication: `/auth`
+   - Mission Fresh authentication: `/mission-fresh/auth`
+   - Care Connector authentication: `/care-connector/auth`
+   - Easier Mood authentication: `/easier-mood/auth`
+   - Hertz Box authentication: `/hertz-box/auth`
+   - Noise Box authentication: `/noise-box/auth`
+   - Easier Manage authentication: `/easier-manage/auth`
+
+2. **App-Specific Web Application Paths**:
+   - Main Well-Charged webapp: `/webapp/*` (e.g., `/webapp/dashboard`, `/webapp/energy`, etc.)
+   - Mission Fresh webapp: `/mission-fresh/app/*`
+   - Care Connector webapp: `/care-connector/app/*`
+   - Easier Mood webapp: `/easier-mood/app/*`
+   - Hertz Box webapp: `/hertz-box/app/*`
+   - Noise Box webapp: `/noise-box/app/*`
+   - Easier Manage webapp: `/easier-manage/app/*`
+
+3. **Authentication Flow Rules**:
+   - When a user clicks on the login/sign-up button in a specific app (e.g., Well-Charged, Mission Fresh, Care Connector), they MUST be directed to that app's authentication page.
+   - The authentication pages must have proper redirects back to the appropriate app.
+   - NEVER redirect from one app's login page to another app's login page.
+   - Authentication tokens should be valid until the user explicitly logs out.
+
+4. **Navigation Rules**:
+   - Each app's "Web App" button MUST lead to that app's own web application.
+   - Well-Charged webapp button MUST lead to Well-Charged webapp (/webapp/dashboard).
+   - Mission Fresh webapp button MUST lead to Mission Fresh webapp (/mission-fresh/app).
+   - Care Connector webapp button MUST lead to Care Connector webapp (/care-connector/app).
+   - Each sub-app's internal navigation (e.g., resources, guides, directories) MUST use that app's path prefix.
+   - NEVER redirect from one app's paths to another app's paths unless explicitly intended.
+
+5. **No Cross-App Redirects**:
+   - The `/webapp/*` routes should NEVER automatically redirect to `/mission-fresh/app` or any other app.
+   - Each app should have its own distinct navigation and routing structure.
+   - If a feature exists in multiple apps, each app should have its own implementation with its own path.
+
+This separation is critical for maintaining proper user experience, data isolation, and application integrity. Any violation of these rules creates a confusing user experience and must be fixed immediately.
+
+### Navigation Structure
+
+### URL Structure
+
+Well-Charged employs a hierarchical URL structure based on platforms and micro-frontends:
+
+1. **Root Level** (`/`)
+   - Marketing site
+   - Public pages
+
+2. **Platform Level**
+   - `/webapp` - Web application
+   - `/mobileapp` - Mobile app screens
+   - `/pcapp` - Desktop application
+   - `/ext` - Browser extension
+
+3. **Micro-Frontend Level**
+   - `/mission-fresh` - Mission Fresh app
+   - `/care-connector` - Care Connector app
+   - `/easier-mood` - Easier Mood app
+   - `/easier-manage` - Easier Manage app
+   - `/noise-box` - Noise Box app
+   - `/hertz-box` - Hertz Box app
+
+4. **Feature Level**
+   - `/app` - Main application
+   - `/auth` - Authentication
+   - `/dashboard` - Dashboard view
+   - `/profile` - User profile
+
+### Navigation Patterns
+
+1. **Global Navigation**
+   - Primary navigation for platform switching
+   - Accessible from all views
+
+2. **App Navigation**
+   - Secondary navigation within micro-frontends
+   - Contextual to current application
+
+3. **Feature Navigation**
+   - Tertiary navigation for feature-specific flows
+   - Nested within app navigation
+
+### Route Protection
+
+1. **Public Routes**
+   - Marketing pages
+   - Authentication pages
+   - Informational content
+
+2. **Protected Routes**
+   - Require authentication
+   - Redirect to login if no session
+   - May require specific roles
+
+## Micro-Frontend Applications
+
+Well-Charged is composed of several micro-frontend applications, each focusing on a specific aspect of wellbeing:
+
+### Mission Fresh Micro-Frontend
+
+Mission Fresh is the world's most comprehensive quit-smoking platform within the Well-Charged ecosystem. Its core philosophy is to provide a judgment-free environment where users can pursue their personal smoking cessation goals through any method that works for them:
+
+- **Multiple Approaches**: Supports various quit methods including cold turkey, gradual reduction, NRT-assisted, or transition to smokeless alternatives
+- **Holistic Support**: Focuses not just on quitting, but on maintaining energy, mood, and focus during withdrawal
+- **Personalized Journeys**: Adapts to each user's individual goals and timeline rather than forcing a one-size-fits-all approach
+- **Comprehensive Tools**: Offers CBT self-help resources, craving management techniques, wellbeing support, and health progress tracking
+- **Evidence-Based**: All recommendations and tools are founded on scientific research and clinical guidelines
+
+#### Advanced Mission Fresh Features
+
+Building on the core philosophy, Mission Fresh implements these enhanced features:
+
+1. **Advanced Craving Management**
+   - Interactive distraction games specifically designed to redirect focus during cravings
+   - AI-powered craving prediction that anticipates triggers based on time, location, and past patterns
+   - Specialized breathwork exercises for immediate stress reduction during withdrawal
+   - Virtual reality "smoke-free zones" for immersive relaxation during intense cravings
+
+2. **Personalized Quit Journey**
+   - AI-driven personalized quit plans adapting to user behavior and success patterns
+   - "Slow Mode" for gradual reduction with customizable tapering schedules
+   - Multiple quit paths with different approaches that adapt based on user progress
+   - Milestone celebration systems with personalized rewards and achievements
+
+3. **Health Visualization & Tracking**
+   - Real-time health recovery timeline showing specific organ and system improvements
+   - Digital twin technology creating a visual representation of health improvements
+   - Wearable device integration for tracking physical improvements (heart rate, sleep quality)
+   - Financial impact calculator showing money saved and future projections
+
+4. **Community & Support Systems**
+   - 24/7 AI-powered quit coach providing immediate guidance during cravings
+   - Peer mentorship matching with users who have similar smoking histories
+   - Weekly virtual "quit clinics" addressing specific cessation challenges
+   - Anonymous community forums with specialized topics (e.g., withdrawal symptoms, weight management)
+
+5. **Gamification & Motivation**
+   - Comprehensive achievement system with real-world reward integrations
+   - Challenge networks for friends and family to participate in quit journeys
+   - Interactive visualization of health and financial benefits
+   - Daily missions and tasks to maintain engagement and build smoke-free habits
+
+6. **Advanced Analytics**
+   - Sophisticated trigger analysis identifying personal smoking cues
+   - Mood correlation tracking to develop emotional regulation strategies
+   - Progress analytics with insights on quit attempts, setbacks, and trends
+   - Predictive modeling to identify high-risk periods for relapse
+
+7. **Mental Health Integration**
+   - Tobacco-specific mindfulness programs targeting psychological addiction
+   - Evidence-based CBT modules for nicotine dependence
+   - Regular mental wellness assessments to monitor anxiety and depression
+   - Guided meditation specifically designed for craving management
+
+8. **Professional Support Integration**
+   - Healthcare provider dashboard for sharing cessation progress
+   - Medication and NRT tracking with effectiveness monitoring
+   - Directory of smoking cessation specialists available for consultation
+   - Integration with telehealth services for on-demand professional support
+
+**Implementation Details:**
+- Located at `/mission-fresh`
+- Uses habit tracking data model with enhanced predictive capabilities
+- Implements achievement system with real-world reward integrations
+- Utilizes machine learning for personalized intervention timing
+- Features responsive design optimized for moments of craving
+
+**Key Tables:**
+- `user_stats8`: Core tracking data
+- `craving_logs8`: Detailed craving and trigger tracking
+- `achievement_progress8`: Gamification and milestone data
+- `health_milestones8`: Physical recovery metrics
+- `quit_plans8`: Personalized cessation strategies
+- `support_interactions8`: Community and coaching interactions
+
+### Care Connector
+
+The Care Connector app facilitates caregiving relationships and support networks.
+
+**Key Features:**
+- Group creation and management
+- Task assignment and tracking
+- Health monitoring
+- Resource sharing
+
+**Implementation Details:**
+- Located at `/care-connector`
+- Uses group-based data model
+- Implements notification system
+
+### Easier Mood
+
+Easier Mood helps track and improve emotional wellbeing and mental health.
+
+**Key Features:**
+- Mood tracking
+- Journaling
+- Meditation guides
+- Mental health resources
+
+**Implementation Details:**
+- Located at `/easier-mood`
+- Uses mood data model
+- Implements journaling system
+
+### Easier Manage
+
+Easier Manage provides tools for nutrition and meal management.
+
+**Key Features:**
+- Meal planning
+- Grocery lists
+- Nutrition tracking
+- Water intake tracking
+
+**Implementation Details:**
+- Located at `/easier-manage`
+- Uses nutrition data model
+- Implements shopping list system
+
+### Noise Box
+
+Noise Box provides focus and concentration audio tools.
+
+**Key Features:**
+- White noise generator
+- Focus sounds
+- Custom sound mixing
+- Timer integration
+
+**Implementation Details:**
+- Located at `/noise-box`
+- Uses audio manipulation
+- Implements background audio service
+
+### Hertz Box
+
+Hertz Box provides sound therapy and relaxation tools.
+
+**Key Features:**
+- Frequency-based therapy
+- Binaurals and isochronic tones
+- Guided relaxation
+- Custom sound creation
+
+**Implementation Details:**
+- Located at `/hertz-box`
+- Uses advanced audio generation
+- Implements frequency manipulation
+
+### Key Architecture Principles
+
+1. **Micro-Frontend Structure**
+   - Each micro-frontend is a separate React application
+   - All micro-frontends share EXACTLY the same framework versions (React, Router, etc.)
+   - All micro-frontends use Vite as their build tool
+   - Each micro-frontend has its own SSOT file in its root directory
+
+2. **Database Strategy for Micro-Frontends**
+   - **Sub-apps MUST use the datatables of the main app** - NOT the other way around
+   - All tables for a specific micro-frontend follow a consistent naming convention
+   - Main app tables can be accessed by micro-frontends through REST API calls
+   - Micro-frontends MUST NEVER create tables that duplicate main app functionality
+
+3. **Module Federation Architecture**
+   - Each micro-frontend exposes components through Module Federation
+   - The main application imports exposed components via Module Federation
+   - Shared dependencies must be properly configured in federation settings
+   - All micro-frontends follow the same exact Module Federation configuration pattern
+
+4. **Micro-Frontend Specific SSOT Files**
+   - Mission Fresh: `ssot5001` (located in `micro-frontends/mission-fresh/`)
+   - Care Connector: `ssot4001` (located in `micro-frontends/care-connector/`)
+   - Easier Mood: `ssot7001` (located in `micro-frontends/easier-mood/`)
+   - Easier Focus: `ssot6001` (located in `micro-frontends/easier-focus/`)
+   - Easier Sleep: `ssot6006` (located in `micro-frontends/easier-sleep/`)
+   - Hertz Box: `ssot2001` (located in `micro-frontends/hertz-box/`)
+   - Noise Box: `ssot3001` (located in `micro-frontends/noise-box/`)
+
+5. **Main App / Micro-Frontend Relationship**
+   - The main app orchestrates the micro-frontends
+   - Each micro-frontend follows the main app's design system
+   - Authentication state is passed from the main app to micro-frontends
+   - Micro-frontends must be independently deployable and testable
+
+### **CRITICAL VERSION ALIGNMENT**
+
+All micro-frontends MUST use EXACTLY the same versions for core dependencies:
+- Vite: v4.4.x (micro-frontends) / v4.5.x (main app)
+- React: 18.2.0
+- React Router: 6.4.0
+- Module Federation Plugin: 1.3.3 (micro-frontends) / 1.3.9 (main app)
+
+## Development Guidelines
+
+### Code Structure
+
+1. **Component Organization**
+   - Functional components with hooks
+   - Components grouped by feature
+   - Shared components in common directories
+
+2. **State Management**
+   - Local state with React hooks
+   - Context API for shared state
+   - Minimal global state
+
+3. **UI Guidelines**
+   - Component-based UI with shadcn/ui
+   - Consistent theming
+   - Mobile-first responsive design
+
+### Coding Standards
+
+1. **TypeScript Usage**
+   - Strict typing for all variables and functions
+   - Interface definitions for all data structures
+   - Generic types for reusable components
+
+2. **Component Patterns**
+   - Container/Presentational pattern
+   - Custom hooks for logic reuse
+   - Composition over inheritance
+
+3. **Error Handling**
+   - Try/catch blocks for async operations
+   - Error boundaries for component failures
+   - User-friendly error messages
+
+## Data Management Guidelines
+
+### Data Flow
+
+1. **Data Loading**
+   - Fetch on component mount
+   - Loading states during data retrieval
+   - Error handling for failed requests
+
+2. **Data Saving**
+   - Optimistic UI updates
+   - Background saving
+   - Retry mechanisms for failed saves
+
+3. **Data Synchronization**
+   - Periodic refresh for critical data
+   - Real-time updates when appropriate
+   - Conflict resolution strategy
+
+### Data Privacy
+
+1. **Personal Information**
+   - Minimize collection of PII
+   - Encrypt sensitive data
+   - Clear data retention policies
+
+2. **Health Data**
+   - Comply with health data regulations
+   - Provide export and deletion options
+   - Transparent data usage policies
+
+## Security Best Practices
+
+### Frontend Security
+
+1. **Input Validation**
+   - Validate all user inputs
+   - Sanitize data before display
+   - Prevent XSS attacks
+
+2. **Authentication Security**
+   - Secure token storage
+   - Session timeout handling
+   - CSRF protection
+
+3. **API Security**
+   - Request authentication
+   - Rate limiting
+   - Data encryption
+
+### Backend Security
+
+1. **Database Security**
+   - Row Level Security (RLS)
+   - Prepared statements
+   - Least privilege access
+
+2. **API Security**
+   - Input validation
+   - Authentication checks
+   - Request throttling
+
+3. **Infrastructure Security**
+   - Secure configuration
+   - Regular updates
+   - Access control
