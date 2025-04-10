@@ -1,7 +1,8 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { DistractionApiClient } from '@/lib/api/distraction-api';
-import { useToast } from '@/components/hooks/use-toast';
-import { useAuth } from '@/components/AuthProvider';
+import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 import {
   BlockedSite,
   DistractionPattern,

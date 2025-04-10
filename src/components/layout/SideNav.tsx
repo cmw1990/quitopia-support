@@ -1,3 +1,4 @@
+
 import {
   BarChart2,
   Clock,
@@ -211,7 +212,7 @@ export function SideNav({ className, ...props }: SideNavProps) {
                   className="w-full justify-start"
                 >
                   {item.icon}
-                  <span className="ml-2">{item.label}</span>
+                  {!collapsed && <span className="ml-2">{item.label}</span>}
                 </Button>
               </Link>
             ))}
@@ -237,7 +238,7 @@ export function SideNav({ className, ...props }: SideNavProps) {
                       className="w-full justify-start"
                     >
                       {item.icon}
-                      <span className="ml-2">{item.label}</span>
+                      {!collapsed && <span className="ml-2">{item.label}</span>}
                     </Button>
                   </Link>
                 ))}
@@ -263,48 +264,28 @@ export function SideNav({ className, ...props }: SideNavProps) {
                 href={item.href}
                 icon={item.icon}
                 label={item.label}
-                active={pathname === item.href}
+                active={pathname.startsWith(item.href)}
               />
             ))}
           </div>
         </div>
       </div>
       
-      {/* Footer */}
+      {/* User Profile at the bottom */}
       <div className="mt-auto border-t p-3">
-        <div className="flex items-center gap-3 rounded-md px-3 py-2">
-          {user ? (
-            <>
-              <Avatar>
-                <AvatarImage src={user.avatarUrl || ''} />
-                <AvatarFallback>
-                  <User className="h-4 w-4" />
-                </AvatarFallback>
-              </Avatar>
-              {!collapsed && (
-                <div className="flex flex-col">
-                  <span className="text-sm font-medium">{user.displayName || 'User'}</span>
-                  <span className="text-xs text-muted-foreground">{user.email}</span>
-                </div>
-              )}
-            </>
-          ) : (
-            <>
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full"
-                asChild
-              >
-                <Link to="/login">
-                  <LogIn className="mr-2 h-4 w-4" />
-                  {!collapsed && "Sign In"}
-                </Link>
-              </Button>
-            </>
+        <div className="flex items-center gap-3">
+          <Avatar className="h-8 w-8">
+            <AvatarFallback>{user.displayName?.charAt(0) || "U"}</AvatarFallback>
+            {user.avatarUrl && <AvatarImage src={user.avatarUrl} alt={user.displayName || "User"} />}
+          </Avatar>
+          {!collapsed && (
+            <div className="grid leading-none">
+              <span className="font-medium">{user.displayName || "User"}</span>
+              <span className="text-xs text-muted-foreground">{user.email}</span>
+            </div>
           )}
         </div>
       </div>
     </div>
   );
-};
+}
