@@ -1,51 +1,22 @@
 
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import { resolve } from 'path'
-import { componentTagger } from "lovable-tagger"
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import path from 'path';
 
-export default defineConfig(({ mode }) => ({
-  plugins: [
-    react(),
-    mode === 'development' && componentTagger(),
-  ].filter(Boolean),
-  resolve: {
-    alias: {
-      '@': resolve(__dirname, './src'),
-    },
-  },
-  optimizeDeps: {
-    include: ['react', 'react-dom', 'react-router-dom', '@supabase/supabase-js'],
-  },
-  build: {
-    sourcemap: true,
-    rollupOptions: {
-      input: {
-        main: resolve(__dirname, 'index.html'),
-      },
-      output: {
-        manualChunks(id) {
-          if (id.includes('node_modules')) {
-            return 'vendor';
-          }
-        }
-      }
-    },
-    chunkSizeWarningLimit: 1000,
-  },
+// https://vitejs.dev/config/
+export default defineConfig({
+  plugins: [react()],
   server: {
-    port: 8080,
-    strictPort: true,
-    host: true,
-    watch: {
-      usePolling: true,
-    },
-    hmr: {
-      overlay: true,
-    },
+    port: 6001,
+    strictPort: true, // Don't try other ports if 6001 is in use
   },
   preview: {
-    port: 8080,
+    port: 6001,
     strictPort: true,
-  }
-}))
+  },
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
+  },
+});

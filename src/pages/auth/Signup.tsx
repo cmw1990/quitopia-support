@@ -5,31 +5,58 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Focus, Loader2 } from 'lucide-react';
 import { useAuth } from '@/components/AuthProvider';
 import { useToast } from '@/hooks/use-toast';
 
-const LoginPage: React.FC = () => {
+const SignupPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [acceptTerms, setAcceptTerms] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { signIn } = useAuth();
+  const { signUp } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (password !== confirmPassword) {
+      toast({
+        title: "Password Mismatch",
+        description: "The passwords you entered don't match. Please try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!acceptTerms) {
+      toast({
+        title: "Terms Required",
+        description: "Please accept the terms of service to continue.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setIsLoading(true);
 
     try {
-      const success = await signIn(email, password);
+      const success = await signUp(email, password);
       if (success) {
-        navigate('/app/dashboard');
+        toast({
+          title: "Account Created",
+          description: "Your account has been created successfully. Please log in.",
+          variant: "success",
+        });
+        navigate('/auth/login');
       }
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to sign in. Please check your credentials.",
+        description: "Failed to create account. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -49,9 +76,9 @@ const LoginPage: React.FC = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl text-center">Log in to your account</CardTitle>
+            <CardTitle className="text-2xl text-center">Create an account</CardTitle>
             <CardDescription className="text-center">
-              Enter your email and password to access your account
+              Fill in the form below to create your EasierFocus account
             </CardDescription>
           </CardHeader>
           <form onSubmit={handleSubmit}>
@@ -65,19 +92,10 @@ const LoginPage: React.FC = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  autoComplete="email"
                 />
               </div>
               <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="password">Password</Label>
-                  <Link
-                    to="/auth/forgot-password"
-                    className="text-sm text-primary hover:underline"
-                  >
-                    Forgot password?
-                  </Link>
-                </div>
+                <Label htmlFor="password">Password</Label>
                 <Input
                   id="password"
                   type="password"
@@ -85,8 +103,35 @@ const LoginPage: React.FC = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  autoComplete="current-password"
                 />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirm-password">Confirm Password</Label>
+                <Input
+                  id="confirm-password"
+                  type="password"
+                  placeholder="••••••••"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id="terms" 
+                  checked={acceptTerms}
+                  onCheckedChange={(checked) => setAcceptTerms(checked === true)}
+                />
+                <Label htmlFor="terms" className="text-sm">
+                  I agree to the{' '}
+                  <Link to="/terms" className="text-primary hover:underline">
+                    Terms of Service
+                  </Link>{' '}
+                  and{' '}
+                  <Link to="/privacy" className="text-primary hover:underline">
+                    Privacy Policy
+                  </Link>
+                </Label>
               </div>
             </CardContent>
             <CardFooter className="flex flex-col">
@@ -98,19 +143,19 @@ const LoginPage: React.FC = () => {
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Logging in...
+                    Creating account...
                   </>
                 ) : (
-                  'Log in'
+                  'Sign up'
                 )}
               </Button>
               <p className="mt-4 text-center text-sm text-muted-foreground">
-                Don't have an account?{' '}
+                Already have an account?{' '}
                 <Link
-                  to="/auth/signup"
+                  to="/auth/login"
                   className="text-primary hover:underline"
                 >
-                  Sign up
+                  Log in
                 </Link>
               </p>
             </CardFooter>
@@ -121,4 +166,4 @@ const LoginPage: React.FC = () => {
   );
 };
 
-export default LoginPage;
+export default SignupPage;

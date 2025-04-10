@@ -1,91 +1,58 @@
+
 import React from 'react';
-import { Bell, ChevronLeft, Brain } from 'lucide-react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { Focus, Bell, Moon, Sun } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import { useTheme } from '@/components/ThemeProvider';
+import { useLocation } from 'react-router-dom';
 
-interface MobileHeaderProps {
-  title?: string;
-  showBackButton?: boolean;
-  showNotifications?: boolean;
-  className?: string;
-}
-
-export function MobileHeader({
-  title,
-  showBackButton = false,
-  showNotifications = true,
-  className,
-}: MobileHeaderProps) {
-  const navigate = useNavigate();
+export const MobileHeader = () => {
+  const { theme, setTheme } = useTheme();
   const location = useLocation();
   
-  // Determine title based on route if not provided
-  const getRouteTitle = () => {
-    if (title) return title;
+  // Determine the page title based on the current path
+  const getTitle = (path: string) => {
+    const parts = path.split('/');
+    const page = parts[parts.length - 1];
     
-    const path = location.pathname;
-    if (path.includes('dashboard')) return 'Dashboard';
-    if (path.includes('focus-timer')) return 'Focus Timer';
-    if (path.includes('enhanced-focus')) return 'Enhanced Focus';
-    if (path.includes('adhd-support')) return 'ADHD Support';
-    if (path.includes('body-doubling')) return 'Body Doubling';
-    if (path.includes('distraction-blocker')) return 'Distraction Blocker';
-    if (path.includes('anti-googlitis')) return 'Anti-Googlitis';
-    if (path.includes('flow-state')) return 'Flow State';
-    if (path.includes('energy-management')) return 'Energy Management';
-    if (path.includes('games')) return 'Games';
-    if (path.includes('settings')) return 'Settings';
-    
-    return 'EasierFocus';
+    switch (page) {
+      case 'dashboard':
+        return 'Dashboard';
+      case 'focus':
+        return 'Focus Timer';
+      case 'tasks':
+        return 'Tasks';
+      case 'settings':
+        return 'Settings';
+      default:
+        return 'EasierFocus';
+    }
   };
-  
-  const handleBack = () => {
-    navigate(-1);
-  };
-  
-  const handleNotifications = () => {
-    navigate('/app/notifications');
-  };
-  
+
   return (
-    <motion.header
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className={cn(
-        "fixed top-0 left-0 right-0 z-40 h-16 flex items-center justify-between bg-background border-b border-border px-4",
-        className
-      )}
-    >
+    <header className="fixed top-0 left-0 right-0 h-16 border-b bg-background flex items-center justify-between px-4 z-10">
       <div className="flex items-center gap-2">
-        {showBackButton ? (
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleBack}
-            className="text-foreground"
-            aria-label="Go back"
-          >
-            <ChevronLeft size={24} />
-          </Button>
-        ) : (
-          <Brain size={24} className="text-primary" />
-        )}
-        <h1 className="text-lg font-medium">{getRouteTitle()}</h1>
+        <Focus className="h-5 w-5 text-primary" />
+        <span className="font-semibold">{getTitle(location.pathname)}</span>
       </div>
       
-      {showNotifications && (
+      <div className="flex items-center gap-2">
+        <Button variant="ghost" size="icon">
+          <Bell className="h-5 w-5" />
+        </Button>
         <Button
           variant="ghost"
           size="icon"
-          onClick={handleNotifications}
-          className="text-foreground"
-          aria-label="Notifications"
+          onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
         >
-          <Bell size={20} />
+          {theme === 'dark' ? (
+            <Sun className="h-5 w-5" />
+          ) : (
+            <Moon className="h-5 w-5" />
+          )}
         </Button>
-      )}
-    </motion.header>
+      </div>
+    </header>
   );
-} 
+};
+
+export default MobileHeader;

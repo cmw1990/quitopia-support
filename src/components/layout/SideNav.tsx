@@ -1,290 +1,156 @@
 
+import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { cn } from '@/lib/utils';
 import {
-  BarChart2,
-  Clock,
-  Command,
-  Compass,
-  Cpu,
-  Droplets,
   Home,
   LayoutDashboard,
-  Lightbulb,
-  Sliders,
-  Sparkles,
-  TimerOff,
-  Award,
-  Zap,
+  Clock,
+  List,
+  Focus,
   Brain,
-  ArrowRightLeft,
-  PanelRightClose,
-  PanelLeftClose,
-  User,
-  LogIn,
+  Activity,
+  Coffee,
+  Calendar,
+  BarChart3,
+  Users,
   Settings,
-  HelpCircle,
-  CircleSlash,
-  Globe,
-  ListTodo,
-  BarChart,
-  ListChecks,
-  Shield
-} from "lucide-react";
+  ChevronRight,
+  Shield,
+  Zap,
+  Wind,
+  Moon,
+  Layers
+} from 'lucide-react';
 
-import React, { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { cn } from "@/lib/utils";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { ScrollArea } from "@/components/ui/scroll-area";
-
-// Simple implementation of missing hooks for compatibility
-const usePathname = () => window.location.pathname;
-const useIsMobile = () => window.innerWidth < 768;
-
-// Simple NavItem component implementation
-const NavItem = ({ 
-  collapsed, 
-  href, 
-  icon, 
-  label, 
-  active 
-}: { 
-  collapsed: boolean; 
-  href: string; 
-  icon: React.ReactNode; 
-  label: string; 
-  active: boolean;
-}) => (
-  <Link
-    to={href}
-    className={cn(
-      "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
-      active 
-        ? "bg-primary/10 text-primary" 
-        : "text-muted-foreground hover:bg-primary/5 hover:text-primary"
-    )}
-  >
-    <div>{icon}</div>
-    {!collapsed && <span>{label}</span>}
-  </Link>
-);
-
-// Simple Logo component
-const Logo = ({ className }: { className?: string }) => (
-  <Brain className={className} />
-);
-
-// Define navigation items
-const mainNav = [
-  {
-    href: "/dashboard",
-    icon: <LayoutDashboard className="h-5 w-5" />,
-    label: "Dashboard"
-  },
-  {
-    href: "/focus-sessions",
-    icon: <Clock className="h-5 w-5" />,
-    label: "Focus Sessions"
-  },
-  {
-    href: "/analytics",
-    icon: <BarChart className="h-5 w-5" />,
-    label: "Analytics"
-  },
-  {
-    href: "/focus-strategies",
-    icon: <Compass className="h-5 w-5" />,
-    label: "Focus Strategies"
-  },
-  {
-    href: "/tasks",
-    icon: <ListChecks className="h-5 w-5" />,
-    label: "Tasks & Goals"
-  },
-  {
-    href: "/mood-energy",
-    icon: <BarChart className="h-5 w-5" />,
-    label: "Mood & Energy"
-  }
-];
-
-const toolsNav = [
-  {
-    href: "/tools/pomodoro",
-    icon: <Clock className="h-5 w-5" />,
-    label: "Pomodoro Timer"
-  },
-  {
-    href: "/tools/task-breakdown",
-    icon: <ListChecks className="h-5 w-5" />,
-    label: "Task Breakdown"
-  },
-  {
-    href: "/tools/energy-management",
-    icon: <Zap className="h-5 w-5" />,
-    label: "Energy Management"
-  },
-  {
-    href: "/tools/distraction-blocker",
-    icon: <Shield className="h-5 w-5" />,
-    label: "Distraction Blocker"
-  }
-];
-
-const accountNav = [
-  {
-    href: "/profile",
-    icon: <User className="h-5 w-5" />,
-    label: "Profile Settings"
-  },
-  {
-    href: "/achievements",
-    icon: <Sparkles className="h-5 w-5" />,
-    label: "Achievements"
-  }
-];
-
-// Add a simple User type definition to match the hook usage
-interface User {
-  email: string;
-  avatarUrl?: string;
-  displayName?: string;
+interface SideNavProps {
+  className?: string;
 }
 
-// Update the useAuth hook with our simplified interface
-const useAuth = () => {
-  // Mock implementation for the hook
-  const user = {
-    email: "user@example.com",
-    avatarUrl: "",
-    displayName: "User"
-  } as User;
-  
-  return { user };
-};
-
-interface SideNavProps extends React.HTMLAttributes<HTMLDivElement> {}
-
-export function SideNav({ className, ...props }: SideNavProps) {
+export function SideNav({ className }: SideNavProps) {
   const location = useLocation();
-  const pathname = location.pathname;
-  const [collapsed, setCollapsed] = useState(false);
-  const { user } = useAuth();
-  const isMobile = useIsMobile();
   
-  const toggleCollapse = () => {
-    setCollapsed(!collapsed);
-  };
+  const mainNav = [
+    {
+      title: 'Dashboard',
+      href: '/app/dashboard',
+      icon: LayoutDashboard
+    },
+    {
+      title: 'Focus Timer',
+      href: '/app/focus-timer',
+      icon: Clock
+    },
+    {
+      title: 'Tasks',
+      href: '/app/tasks',
+      icon: List
+    },
+    {
+      title: 'Distraction Blocker',
+      href: '/app/distraction-blocker',
+      icon: Shield
+    },
+    {
+      title: 'Energy',
+      href: '/app/energy',
+      icon: Zap
+    },
+    {
+      title: 'Anti-Fatigue',
+      href: '/app/anti-fatigue',
+      icon: Coffee
+    }
+  ];
+  
+  const supportTools = [
+    {
+      title: 'ADHD Support',
+      href: '/app/adhd-support',
+      icon: Brain
+    },
+    {
+      title: 'Body Doubling',
+      href: '/app/body-doubling',
+      icon: Users
+    },
+    {
+      title: 'Breathing',
+      href: '/app/breathing',
+      icon: Wind
+    },
+    {
+      title: 'Sleep Optimization',
+      href: '/app/sleep',
+      icon: Moon
+    },
+    {
+      title: 'Analytics',
+      href: '/app/analytics',
+      icon: BarChart3
+    }
+  ];
 
   return (
-    <div className={cn(
-      "fixed inset-y-0 left-0 z-20 flex h-full flex-col border-r bg-card text-card-foreground",
-      collapsed ? "w-[72px]" : "w-[240px]",
-      isMobile && "hidden",
-      className
-    )}>
-      <div className="flex h-16 items-center border-b px-4">
+    <div className={cn("border-r h-screen w-64 py-4 flex flex-col bg-background", className)}>
+      <div className="px-4 py-2 mb-4">
         <Link to="/" className="flex items-center gap-2">
-          <Logo className="h-7 w-7" />
-          {!collapsed && (
-            <span className="font-bold transition-opacity">Easier Focus</span>
-          )}
+          <Focus className="h-6 w-6 text-primary" />
+          <span className="font-semibold text-xl">EasierFocus</span>
         </Link>
-        <Button 
-          variant="ghost" 
-          size="icon"
-          className="ml-auto"
-          onClick={toggleCollapse}
-        >
-          {collapsed ? <PanelRightClose className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
-        </Button>
       </div>
       
-      <div className="flex-1 flex flex-col overflow-y-auto">
-        <div className="px-3 py-2">
-          {/* Main Navigation */}
-          <div className="space-y-1">
-            {mainNav.map((item) => (
-              <Link to={item.href} key={item.href}>
-                <Button
-                  variant={pathname.startsWith(item.href) ? "secondary" : "ghost"}
-                  className="w-full justify-start"
-                >
-                  {item.icon}
-                  {!collapsed && <span className="ml-2">{item.label}</span>}
-                </Button>
-              </Link>
-            ))}
-          </div>
-          
-          {/* Divider */}
-          <Separator className="my-2" />
-          
-          {/* Tools Section */}
-          <div className="space-y-1">
-            <div className={cn(
-              "flex items-center px-3 text-xs font-medium text-muted-foreground",
-              collapsed && "justify-center"
-            )}>
-              {!collapsed ? "Tools" : "—"}
-            </div>
-            <ScrollArea className="h-[300px]">
-              <div className="space-y-1 px-1">
-                {toolsNav.map((item) => (
-                  <Link to={item.href} key={item.href}>
-                    <Button
-                      variant={pathname.startsWith(item.href) ? "secondary" : "ghost"}
-                      className="w-full justify-start"
-                    >
-                      {item.icon}
-                      {!collapsed && <span className="ml-2">{item.label}</span>}
-                    </Button>
-                  </Link>
-                ))}
-              </div>
-            </ScrollArea>
-          </div>
-          
-          {/* Divider */}
-          <Separator className="my-2" />
-          
-          {/* Profile Section */}
-          <div className="space-y-1">
-            <div className={cn(
-              "flex items-center px-3 text-xs font-medium text-muted-foreground",
-              collapsed && "justify-center"
-            )}>
-              {!collapsed ? "Account" : "—"}
-            </div>
-            {accountNav.map((item) => (
-              <NavItem 
-                key={item.href}
-                collapsed={collapsed}
-                href={item.href}
-                icon={item.icon}
-                label={item.label}
-                active={pathname.startsWith(item.href)}
-              />
-            ))}
-          </div>
+      <div className="flex-1 px-2 space-y-6 overflow-y-auto">
+        <div className="space-y-1">
+          <h3 className="px-4 text-xs font-semibold tracking-tight uppercase text-muted-foreground">
+            Core
+          </h3>
+          {mainNav.map((item, index) => (
+            <Link
+              key={index}
+              to={item.href}
+              className={cn(
+                "flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent",
+                location.pathname === item.href ? "bg-accent text-accent-foreground" : "text-muted-foreground"
+              )}
+            >
+              <item.icon className="h-4 w-4" />
+              <span>{item.title}</span>
+            </Link>
+          ))}
+        </div>
+        
+        <div className="space-y-1">
+          <h3 className="px-4 text-xs font-semibold tracking-tight uppercase text-muted-foreground">
+            Support Tools
+          </h3>
+          {supportTools.map((item, index) => (
+            <Link
+              key={index}
+              to={item.href}
+              className={cn(
+                "flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent",
+                location.pathname === item.href ? "bg-accent text-accent-foreground" : "text-muted-foreground"
+              )}
+            >
+              <item.icon className="h-4 w-4" />
+              <span>{item.title}</span>
+            </Link>
+          ))}
         </div>
       </div>
       
-      {/* User Profile at the bottom */}
-      <div className="mt-auto border-t p-3">
-        <div className="flex items-center gap-3">
-          <Avatar className="h-8 w-8">
-            <AvatarFallback>{user.displayName?.charAt(0) || "U"}</AvatarFallback>
-            {user.avatarUrl && <AvatarImage src={user.avatarUrl} alt={user.displayName || "User"} />}
-          </Avatar>
-          {!collapsed && (
-            <div className="grid leading-none">
-              <span className="font-medium">{user.displayName || "User"}</span>
-              <span className="text-xs text-muted-foreground">{user.email}</span>
-            </div>
+      <div className="border-t mt-auto pt-2 px-2">
+        <Link
+          to="/app/settings"
+          className={cn(
+            "flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent",
+            location.pathname === '/app/settings' ? "bg-accent text-accent-foreground" : "text-muted-foreground"
           )}
-        </div>
+        >
+          <Settings className="h-4 w-4" />
+          <span>Settings</span>
+        </Link>
       </div>
     </div>
   );

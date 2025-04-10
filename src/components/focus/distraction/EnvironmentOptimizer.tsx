@@ -1,120 +1,146 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { HomeIcon, Monitor, Volume2, Sun, Users, Plus, Check } from 'lucide-react';
 import { EnvironmentRecommendation } from '@/lib/types/distraction-types';
-import { Home, Monitor, Users } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
-interface EnvironmentOptimizerProps {
-  recommendations: EnvironmentRecommendation[];
-  onImplement: (id: string) => void;
-  onDismiss: (id: string) => void;
-}
-
-export const EnvironmentOptimizer: React.FC<EnvironmentOptimizerProps> = ({ 
-  recommendations, 
-  onImplement, 
-  onDismiss 
-}) => {
-  const getCategoryIcon = (category: EnvironmentRecommendation['category']) => {
-    switch (category) {
-      case 'physical':
-        return <Home className="h-4 w-4" />;
-      case 'digital':
-        return <Monitor className="h-4 w-4" />;
-      case 'social':
-        return <Users className="h-4 w-4" />;
-      default:
-        return null;
+export const EnvironmentOptimizer: React.FC = () => {
+  const [recommendations, setRecommendations] = useState<EnvironmentRecommendation[]>([
+    {
+      id: "1",
+      user_id: "current-user", // Would be replaced with actual user ID
+      category: "physical",
+      title: "Declutter workspace",
+      description: "Remove unnecessary items from your desk and organize cables",
+      impact_level: "high",
+      implemented: false,
+      created_at: new Date().toISOString()
+    },
+    {
+      id: "2",
+      user_id: "current-user",
+      category: "digital",
+      title: "Clean up desktop",
+      description: "Organize desktop files and create a clear folder structure",
+      impact_level: "medium",
+      implemented: false,
+      created_at: new Date().toISOString()
+    },
+    {
+      id: "3",
+      user_id: "current-user",
+      category: "social",
+      title: "Establish office hours",
+      description: "Let others know when you're available and when you need uninterrupted time",
+      impact_level: "high",
+      implemented: false,
+      created_at: new Date().toISOString()
     }
-  };
+  ]);
+  const { toast } = useToast();
 
-  const getImpactColor = (level: EnvironmentRecommendation['impact_level']) => {
+  const getImpactColor = (level: 'high' | 'medium' | 'low') => {
     switch (level) {
-      case 'high':
-        return 'bg-red-100 text-red-800';
-      case 'medium':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'low':
-        return 'bg-green-100 text-green-800';
-      default:
-        return '';
+      case 'high': return 'text-green-500';
+      case 'medium': return 'text-amber-500';
+      case 'low': return 'text-blue-500';
+      default: return 'text-gray-500';
     }
   };
+
+  const getCategoryIcon = (category: 'physical' | 'digital' | 'social') => {
+    switch (category) {
+      case 'physical': return <HomeIcon className="h-4 w-4" />;
+      case 'digital': return <Monitor className="h-4 w-4" />;
+      case 'social': return <Users className="h-4 w-4" />;
+      default: return <HomeIcon className="h-4 w-4" />;
+    }
+  };
+
+  const handleToggleImplemented = (id: string) => {
+    setRecommendations(recommendations.map(rec => {
+      if (rec.id === id) {
+        const newState = !rec.implemented;
+        
+        toast({
+          title: newState ? "Recommendation Implemented" : "Recommendation Reset",
+          description: newState ? "Great job implementing this change!" : "You can try this again when ready",
+          variant: newState ? "success" : "default",
+        });
+        
+        return { ...rec, implemented: newState };
+      }
+      return rec;
+    }));
+  };
+
+  const implementedCount = recommendations.filter(rec => rec.implemented).length;
+  const implementationRate = (implementedCount / recommendations.length) * 100;
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-medium">Environment Optimization</h3>
-        <div className="flex space-x-2">
-          <Button variant="outline" size="sm">
-            <Home className="h-4 w-4 mr-2" />
-            Physical
-          </Button>
-          <Button variant="outline" size="sm">
-            <Monitor className="h-4 w-4 mr-2" />
-            Digital
-          </Button>
-          <Button variant="outline" size="sm">
-            <Users className="h-4 w-4 mr-2" />
-            Social
-          </Button>
-        </div>
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold">Environment Optimizer</h2>
+        <Button variant="outline" className="gap-2">
+          <Plus className="h-4 w-4" />
+          Add Custom
+        </Button>
       </div>
 
-      {recommendations.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center p-6">
-            <p className="text-muted-foreground mb-4">No recommendations yet</p>
-            <Button variant="outline">Generate Recommendations</Button>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="space-y-4">
-          {recommendations.map((rec) => (
-            <Card key={rec.id} className={rec.implemented ? "bg-muted" : ""}>
-              <CardHeader className="pb-2">
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-2">
+      <Card>
+        <CardHeader>
+          <CardTitle>Implementation Progress</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span>{implementedCount} of {recommendations.length} implemented</span>
+              <span>{Math.round(implementationRate)}%</span>
+            </div>
+            <Progress value={implementationRate} />
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="space-y-4">
+        {recommendations.map(rec => (
+          <Card key={rec.id}>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-start gap-4">
+                  <div className="p-2 bg-primary/10 rounded-full">
                     {getCategoryIcon(rec.category)}
-                    <CardTitle className="text-base">{rec.title}</CardTitle>
                   </div>
-                  <Badge className={getImpactColor(rec.impact_level)}>
-                    {rec.impact_level.charAt(0).toUpperCase() + rec.impact_level.slice(1)} Impact
-                  </Badge>
+                  <div>
+                    <h3 className="font-medium">{rec.title}</h3>
+                    <p className="text-sm text-muted-foreground">{rec.description}</p>
+                    <div className="flex items-center mt-1 text-xs">
+                      <span className={`font-medium ${getImpactColor(rec.impact_level)}`}>
+                        {rec.impact_level.charAt(0).toUpperCase() + rec.impact_level.slice(1)} Impact
+                      </span>
+                    </div>
+                  </div>
                 </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm mb-4">{rec.description}</p>
-                {!rec.implemented ? (
-                  <div className="flex justify-end space-x-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => onDismiss(rec.id)}
-                    >
-                      Dismiss
-                    </Button>
-                    <Button 
-                      size="sm"
-                      onClick={() => onImplement(rec.id)}
-                    >
-                      Implement
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="text-right">
-                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                      Implemented
-                    </Badge>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
+                <div className="flex items-center gap-2">
+                  <Label htmlFor={`switch-${rec.id}`} className="sr-only">
+                    Toggle implemented
+                  </Label>
+                  <Switch
+                    id={`switch-${rec.id}`}
+                    checked={rec.implemented}
+                    onCheckedChange={() => handleToggleImplemented(rec.id)}
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
     </div>
   );
 };

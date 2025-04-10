@@ -1,155 +1,160 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Badge } from '@/components/ui/badge';
+import { Trash2, Plus, Check, Timer, RefreshCw } from 'lucide-react';
 import { DigitalMinimalismGoal } from '@/lib/types/distraction-types';
+import { useToast } from '@/hooks/use-toast';
 
-interface DigitalMinimalismProps {
-  goals: DigitalMinimalismGoal[];
-  onUpdate: (id: string, updates: Partial<DigitalMinimalismGoal>) => Promise<void>;
-  onAddReflection: (goalId: string, reflection: string) => void;
-  onCompleteMilestone: (goalId: string, milestoneIndex: number) => void;
-}
+export const DigitalMinimalism: React.FC = () => {
+  const [goals, setGoals] = useState<DigitalMinimalismGoal[]>([]);
+  const [newGoalTitle, setNewGoalTitle] = useState('');
+  const { toast } = useToast();
 
-export const DigitalMinimalism: React.FC<DigitalMinimalismProps> = ({ 
-  goals, 
-  onUpdate,
-  onAddReflection,
-  onCompleteMilestone
-}) => {
-  const [newReflection, setNewReflection] = React.useState('');
-  const [activeGoalId, setActiveGoalId] = React.useState<string | null>(null);
+  const handleAddGoal = () => {
+    if (!newGoalTitle.trim()) {
+      toast({
+        title: "Goal Required",
+        description: "Please enter a goal title",
+        variant: "destructive",
+      });
+      return;
+    }
 
-  const handleSubmitReflection = (goalId: string) => {
-    if (newReflection.trim()) {
-      onAddReflection(goalId, newReflection);
-      setNewReflection('');
+    const newGoal: DigitalMinimalismGoal = {
+      id: Date.now().toString(),
+      user_id: "current-user-id", // Would be replaced with actual user ID
+      title: newGoalTitle,
+      description: "",
+      start_date: new Date().toISOString(),
+      category: "reduce",
+      progress: 0,
+      milestones: [],
+      reflections: [],
+      completed: false
+    };
+
+    setGoals([...goals, newGoal]);
+    setNewGoalTitle('');
+    
+    toast({
+      title: "Goal Added",
+      description: "Your new digital minimalism goal has been created",
+      variant: "success",
+    });
+  };
+
+  const handleToggleComplete = (goalId: string) => {
+    setGoals(goals.map(goal => {
+      if (goal.id === goalId) {
+        return { ...goal, completed: !goal.completed };
+      }
+      return goal;
+    }));
+  };
+
+  const handleRemoveGoal = (goalId: string) => {
+    setGoals(goals.filter(goal => goal.id !== goalId));
+    
+    toast({
+      title: "Goal Removed",
+      description: "Your goal has been removed",
+    });
+  };
+
+  const getCategoryBadgeClass = (category: string) => {
+    switch (category) {
+      case 'reduce':
+        return 'bg-orange-500 hover:bg-orange-600';
+      case 'replace':
+        return 'bg-blue-500 hover:bg-blue-600';
+      case 'reflect':
+        return 'bg-green-500 hover:bg-green-600';
+      default:
+        return 'bg-gray-500 hover:bg-gray-600';
     }
   };
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-medium">Digital Minimalism Goals</h3>
-        <Button variant="outline">Add Goal</Button>
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold">Digital Minimalism</h2>
+        <Button variant="outline" className="gap-2">
+          <RefreshCw className="h-4 w-4" />
+          Refresh Goals
+        </Button>
       </div>
 
-      {goals.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center p-6">
-            <p className="text-muted-foreground mb-4">No digital minimalism goals yet</p>
-            <Button variant="outline">Create your first goal</Button>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="space-y-4">
-          {goals.map((goal) => (
-            <Card key={goal.id} className={goal.completed ? "opacity-70" : ""}>
-              <CardHeader>
-                <div className="flex justify-between items-center">
-                  <CardTitle className="text-base">{goal.title}</CardTitle>
-                  <span className={`text-xs px-2 py-1 rounded ${
-                    goal.category === 'reduce' 
-                      ? 'bg-red-100 text-red-800' 
-                      : goal.category === 'replace'
-                      ? 'bg-blue-100 text-blue-800'
-                      : 'bg-purple-100 text-purple-800'
-                  }`}>
-                    {goal.category.charAt(0).toUpperCase() + goal.category.slice(1)}
-                  </span>
-                </div>
-                <p className="text-sm text-muted-foreground">{goal.description}</p>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span>Progress</span>
-                      <span>{goal.progress}%</span>
-                    </div>
-                    <Progress value={goal.progress} />
-                  </div>
-                  
-                  <div>
-                    <h4 className="text-sm font-medium mb-2">Milestones</h4>
-                    <div className="space-y-2">
-                      {goal.milestones.map((milestone, index) => (
-                        <div key={index} className="flex items-center space-x-2">
-                          <Checkbox 
-                            id={`milestone-${goal.id}-${index}`}
-                            checked={milestone.completed}
-                            onCheckedChange={() => onCompleteMilestone(goal.id, index)}
-                          />
-                          <label 
-                            htmlFor={`milestone-${goal.id}-${index}`}
-                            className={`text-sm ${milestone.completed ? 'line-through text-muted-foreground' : ''}`}
-                          >
-                            {milestone.description}
-                          </label>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  
-                  {activeGoalId === goal.id ? (
-                    <div className="space-y-2">
-                      <h4 className="text-sm font-medium">Add Reflection</h4>
-                      <Textarea 
-                        value={newReflection}
-                        onChange={(e) => setNewReflection(e.target.value)}
-                        placeholder="What have you learned from this practice?"
-                        className="h-20"
-                      />
-                      <div className="flex justify-end space-x-2">
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => setActiveGoalId(null)}
-                        >
-                          Cancel
-                        </Button>
-                        <Button 
-                          size="sm"
-                          onClick={() => handleSubmitReflection(goal.id)}
-                        >
-                          Save Reflection
-                        </Button>
+      <Card>
+        <CardHeader>
+          <CardTitle>Create New Goal</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex gap-2">
+            <Input 
+              placeholder="Enter a digital minimalism goal..." 
+              value={newGoalTitle}
+              onChange={(e) => setNewGoalTitle(e.target.value)}
+              className="flex-1"
+            />
+            <Button onClick={handleAddGoal}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Goal
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="space-y-4">
+        {goals.length === 0 ? (
+          <Card className="p-8 text-center">
+            <div className="text-muted-foreground">You haven't created any digital minimalism goals yet.</div>
+          </Card>
+        ) : (
+          goals.map(goal => (
+            <Card key={goal.id} className={`transition-all ${goal.completed ? 'bg-muted' : ''}`}>
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start gap-3 flex-1">
+                    <Checkbox
+                      checked={goal.completed}
+                      onCheckedChange={() => handleToggleComplete(goal.id)}
+                    />
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className={`font-medium ${goal.completed ? 'line-through text-muted-foreground' : ''}`}>
+                          {goal.title}
+                        </span>
+                        <Badge className={getCategoryBadgeClass(goal.category)}>
+                          {goal.category}
+                        </Badge>
+                      </div>
+                      {goal.description && (
+                        <p className="text-sm text-muted-foreground">{goal.description}</p>
+                      )}
+                      <div className="flex items-center text-xs text-muted-foreground">
+                        <Timer className="h-3 w-3 mr-1" />
+                        Started {new Date(goal.start_date).toLocaleDateString()}
                       </div>
                     </div>
-                  ) : (
-                    <Button 
-                      variant="link" 
-                      className="px-0"
-                      onClick={() => setActiveGoalId(goal.id)}
-                    >
-                      Add reflection
-                    </Button>
-                  )}
-                  
-                  {goal.reflections.length > 0 && (
-                    <div>
-                      <h4 className="text-sm font-medium mb-2">Reflections</h4>
-                      <div className="space-y-2 max-h-32 overflow-y-auto">
-                        {goal.reflections.map((reflection, index) => (
-                          <div key={index} className="text-sm p-2 bg-muted rounded-md">
-                            <p className="text-xs text-muted-foreground mb-1">
-                              {new Date(reflection.date).toLocaleDateString()}
-                            </p>
-                            <p>{reflection.content}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleRemoveGoal(goal.id)}
+                    className="text-muted-foreground hover:text-destructive"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </div>
               </CardContent>
             </Card>
-          ))}
-        </div>
-      )}
+          ))
+        )}
+      </div>
     </div>
   );
 };
