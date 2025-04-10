@@ -1,5 +1,6 @@
+
 import { Navigate, Outlet } from 'react-router-dom';
-import { useAuth } from './AuthProvider';
+import { useAuth } from './auth/AuthProvider';
 import { LoadingSpinner } from './ui/loading-spinner';
 
 interface RouteGuardProps {
@@ -11,10 +12,10 @@ export const RouteGuard = ({
   requireAuth = true, 
   redirectTo = '/auth/login' 
 }: RouteGuardProps) => {
-  const { session, loading } = useAuth();
+  const { session, isLoading } = useAuth();
 
   // Don't show loading spinner for public routes
-  if (loading && requireAuth) {
+  if (isLoading && requireAuth) {
     return (
       <div className="flex h-screen w-screen items-center justify-center">
         <LoadingSpinner size={48} />

@@ -1,8 +1,9 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { signIn, signUp, resetPassword } from '@/api/auth-service';
+import { signIn, signUp, resetPassword, signOut } from '@/api/auth-service';
+import { supabase } from '@/integrations/supabase/supabase-client';
 
 interface AuthProviderProps {
   children: React.ReactNode;
@@ -10,7 +11,35 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [session, setSession] = useState<any>(null);
+
+  useEffect(() => {
+    // Initial session check
+    const initializeAuth = async () => {
+      try {
+        const { data } = await supabase.auth.getSession();
+        setSession(data.session);
+        setIsLoading(false);
+
+        // Set up listener for auth changes
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(
+          (_event, currentSession) => {
+            setSession(currentSession);
+          }
+        );
+
+        return () => {
+          subscription.unsubscribe();
+        };
+      } catch (error) {
+        console.error('Error initializing auth:', error);
+        setIsLoading(false);
+      }
+    };
+
+    initializeAuth();
+  }, []);
 
   const handleSignIn = async (email: string, password: string) => {
     setIsLoading(true);
@@ -77,12 +106,34 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  const handleSignOut = async () => {
+    try {
+      const { error } = await signOut();
+      
+      if (error) {
+        toast.error(error.message || 'Sign out failed');
+        return false;
+      }
+      
+      toast.success('Signed out successfully');
+      navigate('/');
+      return true;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred';
+      toast.error(errorMessage);
+      return false;
+    }
+  };
+
   return (
     <AuthContext.Provider value={{
       signIn: handleSignIn,
       signUp: handleSignUp,
       sendPasswordResetEmail: handleSendPasswordResetEmail,
-      isLoading
+      signOut: handleSignOut,
+      isLoading,
+      session,
+      user: session?.user || null
     }}>
       {children}
     </AuthContext.Provider>
@@ -94,12 +145,18 @@ const AuthContext = React.createContext<{
   signIn: (email: string, password: string) => Promise<boolean>;
   signUp: (email: string, password: string, metadata?: any) => Promise<boolean>;
   sendPasswordResetEmail: (email: string) => Promise<boolean>;
+  signOut: () => Promise<boolean>;
   isLoading: boolean;
+  session: any | null;
+  user: any | null;
 }>({
   signIn: async () => false,
   signUp: async () => false,
   sendPasswordResetEmail: async () => false,
-  isLoading: false
+  signOut: async () => false,
+  isLoading: false,
+  session: null,
+  user: null
 });
 
 export const useAuth = () => {
