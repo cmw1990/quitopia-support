@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { AmbientSoundPlayer } from '@/components/audio/AmbientSoundPlayer';
 
 const GamesPage: React.FC = () => {
