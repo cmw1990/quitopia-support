@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/supabase-client';
 import { AuthError } from '@supabase/supabase-js';
 
