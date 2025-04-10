@@ -7,7 +7,7 @@ import '@/styles/globals.css';
 const App: React.FC = () => {
   return (
     <BrowserRouter>
-      <div className="app-container">
+      <div className="app-container min-h-screen bg-background">
         <AppRouter />
       </div>
     </BrowserRouter>
