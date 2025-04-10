@@ -113,7 +113,9 @@ dist/
 /error-fix-reports/
 /health-check-results/
 *.log
+# JSON files (except package.json)
 *.json
+!package.json
 *.png
 *.md
 *.txt
