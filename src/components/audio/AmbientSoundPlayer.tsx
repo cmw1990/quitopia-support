@@ -1,87 +1,83 @@
 
-import React, { useState, useRef } from 'react';
-import { Play, Pause, Volume2, VolumeX } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import React, { useState, useRef, useEffect } from 'react';
 import { Slider } from '@/components/ui/slider';
+import { Play, Pause, Volume2 } from 'lucide-react';
 
 interface AmbientSoundPlayerProps {
-  soundSrc: string;
   name: string;
+  soundSrc: string;
 }
 
-export const AmbientSoundPlayer: React.FC<AmbientSoundPlayerProps> = ({ soundSrc, name }) => {
+export const AmbientSoundPlayer: React.FC<AmbientSoundPlayerProps> = ({
+  name,
+  soundSrc,
+}) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(70);
-  const [isMuted, setIsMuted] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = volume / 100;
+    }
+  }, [volume]);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    
+    return () => {
+      if (audio) {
+        audio.pause();
+      }
+    };
+  }, []);
 
   const togglePlay = () => {
     if (audioRef.current) {
       if (isPlaying) {
         audioRef.current.pause();
       } else {
-        audioRef.current.play();
+        audioRef.current.play().catch(error => {
+          console.error("Audio playback failed:", error);
+        });
       }
       setIsPlaying(!isPlaying);
     }
   };
 
-  const toggleMute = () => {
-    if (audioRef.current) {
-      audioRef.current.muted = !isMuted;
-      setIsMuted(!isMuted);
-    }
-  };
-
-  const handleVolumeChange = (value: number[]) => {
-    const newVolume = value[0];
-    setVolume(newVolume);
-    if (audioRef.current) {
-      audioRef.current.volume = newVolume / 100;
-    }
+  const handleVolumeChange = (newValue: number[]) => {
+    setVolume(newValue[0]);
   };
 
   return (
-    <div className="flex flex-col p-4 bg-card border rounded-lg shadow-sm">
-      <audio 
-        ref={audioRef} 
-        src={soundSrc} 
-        loop 
-        onEnded={() => setIsPlaying(false)}
-      />
+    <div className="bg-card rounded-lg border p-4 shadow-sm">
+      <audio ref={audioRef} src={soundSrc} loop />
       
-      <div className="flex items-center mb-3">
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="mr-2 h-8 w-8 text-primary" 
+      <h3 className="font-medium mb-2">{name}</h3>
+      
+      <div className="flex items-center space-x-2">
+        <button
           onClick={togglePlay}
+          className="p-2 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
           aria-label={isPlaying ? "Pause" : "Play"}
         >
-          {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-        </Button>
-        <span className="font-medium flex-1">{name}</span>
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="h-8 w-8 text-muted-foreground" 
-          onClick={toggleMute}
-          aria-label={isMuted ? "Unmute" : "Mute"}
-        >
-          {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
-        </Button>
-      </div>
-      
-      <div className="w-full px-1">
-        <Slider
-          value={[volume]}
-          min={0}
-          max={100}
-          step={1}
-          onValueChange={handleVolumeChange}
-          aria-label="Volume"
-        />
+          {isPlaying ? <Pause size={18} /> : <Play size={18} />}
+        </button>
+        
+        <div className="flex items-center space-x-2 flex-1">
+          <Volume2 className="h-4 w-4 text-muted-foreground" />
+          <Slider
+            value={[volume]}
+            min={0}
+            max={100}
+            step={1}
+            onValueChange={handleVolumeChange}
+            className="flex-1"
+          />
+        </div>
       </div>
     </div>
   );
 };
+
+export default AmbientSoundPlayer;

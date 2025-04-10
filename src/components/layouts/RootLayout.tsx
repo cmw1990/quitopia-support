@@ -1,8 +1,9 @@
 
+import React from 'react';
 import { Outlet } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
 
-export default function RootLayout() {
+const RootLayout: React.FC = () => {
   return (
     <div className="min-h-screen bg-background">
       <main>
@@ -11,4 +12,6 @@ export default function RootLayout() {
       <Toaster />
     </div>
   );
-}
+};
+
+export default RootLayout;
