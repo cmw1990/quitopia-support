@@ -10,6 +10,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "lovable-tagger": "^1.1.8"
+    "@types/react-dom": "^19.1.2",
+    "@vitejs/plugin-react": "^4.3.4",
+    "lovable-tagger": "^1.1.8",
+    "react-dom": "^19.1.0",
+    "react-router-dom": "^7.5.0"
   }
 }
