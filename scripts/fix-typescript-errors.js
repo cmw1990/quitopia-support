@@ -1,3 +1,4 @@
+
 #!/usr/bin/env node
 
 /**
@@ -59,10 +60,10 @@ const COMMON_FIXES = {
   }
 };
 
-// Run TypeScript compiler to get errors
+// Run TypeScript compiler to get errors - removed the --noEmit flag
 function runTsc() {
   return new Promise((resolve, reject) => {
-    exec('npx tsc --noEmit', { cwd: projectRoot }, (error, stdout, stderr) => {
+    exec('npx tsc', { cwd: projectRoot }, (error, stdout, stderr) => {
       if (stderr) {
         console.error('TypeScript error output:', stderr);
       }

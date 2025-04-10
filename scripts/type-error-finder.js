@@ -1,3 +1,4 @@
+
 #!/usr/bin/env node
 
 /**
@@ -73,8 +74,8 @@ function findTypeErrors() {
   
   let tscOutput;
   try {
-    // Use tsc to get compilation errors without emitting files
-    tscOutput = execSync('npx tsc --noEmit', { encoding: 'utf-8' });
+    // Use tsc to get compilation errors without emitting files - removed --noEmit
+    tscOutput = execSync('npx tsc', { encoding: 'utf-8' });
   } catch (error) {
     tscOutput = error.stdout;
   }

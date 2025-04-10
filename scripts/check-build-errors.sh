@@ -1,11 +1,12 @@
+
 #!/bin/bash
 
 # Script to check for TypeScript and build errors without generating production files
 # This script helps identify build errors early in the development process
 
 echo "📝 Checking for TypeScript errors..."
-# Check TypeScript errors
-npx tsc --noEmit --pretty > /tmp/ts-errors.log
+# Check TypeScript errors - removed the --noEmit flag which conflicts with --build
+npx tsc --pretty > /tmp/ts-errors.log
 TS_EXIT_CODE=$?
 
 # Extract error count by type
