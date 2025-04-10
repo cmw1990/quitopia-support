@@ -42406,13 +42406,13 @@ export type Database = {
       }
       get_sleep_insights_rpc: {
         Args:
-          | { p_user_id: string; p_start_date?: string; p_end_date?: string }
           | {
               user_id_param: string
               start_date_param?: string
               end_date_param?: string
               limit_param?: number
             }
+          | { p_user_id: string; p_start_date?: string; p_end_date?: string }
         Returns: Json
       }
       get_tables: {

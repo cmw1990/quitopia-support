@@ -5,11 +5,12 @@ import App from './App';
 import { ThemeProvider } from '@/lib/ThemeProvider';
 import '@/styles/globals.css';
 
-// Create a more reliable rendering function
-const root = document.getElementById('root');
+// Create a reliable rendering function
+const rootElement = document.getElementById('root');
 
-if (root) {
-  ReactDOM.createRoot(root).render(
+if (rootElement) {
+  const root = ReactDOM.createRoot(rootElement);
+  root.render(
     <React.StrictMode>
       <ThemeProvider defaultTheme="system">
         <App />
