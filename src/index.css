@@ -1,0 +1,154 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Define base color palette (adjust as needed for zen/apple feel) */
+    --color-background: 255 255 255; /* White */
+    --color-foreground: 20 20 20; /* Near Black */
+    --color-primary: 96 165 250; /* New: Soft Blue (adhd.light) */
+    --color-primary-light: 147 197 253; /* New: Lighter Blue */
+    --color-primary-dark: 59 130 246; /* New: Slightly Darker Blue (adhd.DEFAULT) */
+    --primary-foreground: 255 255 255; /* White - OK for Soft Blue */
+    
+    --color-secondary: 245 158 11; /* energy.DEFAULT (Amber) - Keep for specific features */
+    --color-secondary-light: 251 191 36; /* energy.light */
+    --color-secondary-dark: 217 119 6; /* energy.dark */
+    --secondary-foreground: 255 255 255; /* White */
+
+    --color-accent: 16 185 129; /* Use flow.DEFAULT (Emerald) as accent? Or keep adhd.DEFAULT blue? Let's keep blue for now. */
+    --color-accent-light: 96 165 250; /* adhd.light */
+    --accent-foreground: 255 255 255; /* White */
+
+    --color-success: 16 185 129; /* flow.DEFAULT (Emerald) */
+    --color-warning: 249 115 22; /* antifatigue.DEFAULT (Orange) */
+    --color-error: 239 68 68; /* Red-500 */
+    --color-info: 99 102 241; /* sleep.DEFAULT (Indigo) */
+    
+    --color-surface: 248 250 252; /* Cool Gray 50 */
+
+    /* Text colors */
+    --color-text-primary: 17 24 39; /* Gray 900 */
+    --color-text-secondary: 55 65 81; /* Gray 700 */
+    --color-text-tertiary: 107 114 128; /* Gray 500 */
+    --color-text-disabled: 156 163 175; /* Gray 400 */
+
+    /* Shadcn/UI Variables (adapt if needed) */
+    --border: 214.3 31.8% 91.4%; /* Keep light gray */
+    --input: 214.3 31.8% 91.4%; /* Keep light gray */
+    --ring: 96 165 250; /* New: Soft Blue */
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --primary: 217 90% 67%; /* New: HSL for Soft Blue (#60a5fa) */
+    --primary-foreground: 210 40% 98%; /* Keep light foreground for blue */
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%; /* Original Shadcn Accent */
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    
+    /* Radii */
+    --radius-sm: 0.3rem; /* Keep small radius */
+    --radius-md: 0.6rem; /* Slightly increased */
+    --radius-lg: 0.9rem; /* Slightly increased */
+    --radius-xl: 1rem; /* Keep */
+    --radius-2xl: 1.5rem; /* Keep */
+    --radius-pill: 9999px;
+
+    /* Shadows (example values, refine as needed) */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+    --shadow-md: 0 3px 5px -1px rgba(0, 0, 0, 0.08), 0 2px 3px -1px rgba(0, 0, 0, 0.04);
+    --shadow-lg: 0 8px 12px -3px rgba(0, 0, 0, 0.08), 0 3px 5px -2px rgba(0, 0, 0, 0.04);
+    --shadow-xl: 0 15px 20px -5px rgba(0, 0, 0, 0.08), 0 8px 8px -5px rgba(0, 0, 0, 0.04);
+
+    /* Fonts (ensure these fonts are loaded, e.g., via index.html or font loading strategy) */
+    --font-family-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    --font-family-mono: 'Fira Code', monospace;
+  }
+
+  .dark {
+    /* Define dark mode colors */
+    --color-background: 30 30 30; /* Slightly Lighter Dark: Neutral 850? */
+    --color-foreground: 245 245 245; /* Neutral 100 */
+    --color-primary: 96 165 250; /* New: Soft Blue */
+    --color-primary-light: 147 197 253; /* New: Lighter Blue */
+    --color-primary-dark: 59 130 246; /* New: Slightly Darker Blue (adhd.DEFAULT) */
+    --primary-foreground: 17 17 17; /* Neutral 950 */
+
+    --color-secondary: 251 191 36; /* energy.light */
+    --color-secondary-light: 252 211 77;
+    --color-secondary-dark: 245 158 11; /* energy.DEFAULT */
+    --secondary-foreground: 17 17 17;
+
+    --color-accent: 96 165 250; /* adhd.light */
+    --color-accent-light: 147 197 253;
+    --accent-foreground: 17 17 17;
+    
+    --color-surface: 45 45 45; /* Slightly Lighter Dark: Neutral 800? */
+
+    /* Text colors */
+    --color-text-primary: 245 245 245; /* Neutral 100 */
+    --color-text-secondary: 229 229 229; /* Neutral 200 */
+    --color-text-tertiary: 163 163 163; /* Neutral 400 */
+    --color-text-disabled: 115 115 115; /* Neutral 500 */
+
+    /* Shadcn/UI Dark Variables */
+    --border: 217.2 32.6% 25.5%; /* Slightly Lighter Border */
+    --input: 217.2 32.6% 25.5%; /* Slightly Lighter Input */
+    --ring: 96 165 250; /* New: Soft Blue */
+    --background: 215 14% 12%; /* HSL for Neutral 850? (approx #1e1e1e) */
+    --foreground: 210 40% 98%;
+    --primary: 210 40% 98%; /* Keep light primary for contrast */
+    --primary-foreground: 222.2 47.4% 11.2%; /* Keep dark foreground */
+    --secondary: 217.2 32.6% 25.5%; /* Lighter secondary surface */
+    --secondary-foreground: 210 40% 98%; /* Keep light secondary fg */
+    --muted: 217.2 32.6% 25.5%; /* Lighter muted surface */
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 25.5%; /* Lighter accent surface */
+    --accent-foreground: 210 40% 98%; /* Keep light accent fg */
+    --destructive: 0 62.8% 45.6%; /* Slightly less intense red */
+    --destructive-foreground: 210 40% 98%;
+    --card: 215 14% 15%; /* HSL for Neutral 800? (approx #262626) */
+    --card-foreground: 210 40% 98%;
+    --popover: 215 14% 15%; /* HSL for Neutral 800? */
+    --popover-foreground: 210 40% 98%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-family-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Remove the old button class */
+/*
+.button {
+  background-color: #007bff; 
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.button:hover {
+  background-color: #0056b3; 
+}
+*/
+
+/* Font loading moved to index.html */
+/* @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code&display=swap'); */

@@ -1,0 +1,162 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variables file
+.env
+.env.*
+!.env.example
+
+# parcel-bundler cache files
+.cache
+.parcel-cache
+
+# Gatsby files
+.cache/
+# Comment in the public line in if your project uses Gatsby and not Next.js
+# https://nextjs.org/blog/next-9-1#public-directory-support
+# public
+
+# vuepress build output
+.vuepress/dist
+
+# vuepress v2.x temp and cache directory
+.temp
+.cache
+
+# Docusaurus cache and generated files
+.docusaurus
+
+# Next.js build output
+.next/
+out/
+
+# Nuxt.js build / generate output
+.nuxt/
+dist/
+
+# Svelte files
+.svelte-kit/
+build/
+
+# Remix files
+.cache/
+build/
+public/build/
+
+# Astro files
+dist/
+.astro/
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Optional stylelint cache
+.stylelintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Optional REPL history
+.node_repl_history
+
+# Custom ignores
+/node_modules/
+/dist/
+/build/
+/.cache/
+.env.development
+.env.local
+.env.production
+
+# Test results and screenshots
+/test-results/
+/test-screenshots/
+/console-error-screenshots/
+/chrome-results/
+/basic-results/
+/check-results/
+/final-report/
+/error-fix-reports/
+/health-check-results/
+*.log
+*.json
+*.png
+*.md
+*.txt
+*.cjs
+*.mjs
+*.sh
+*.py
+
+# Specific files to ignore
+db-verification-results.json
+console-error-results.json
+test-results.json
+error-report.json
+error-summary.txt
+dev-server.log
+dev-server-output.log
+public-server.log
+database-setup-errors.log
+test_run_output*.log
+login-*.png
+ssot*.md
+ssot*.json
+d1.md
+f1.md
+c61.md
+c63.md
+test_file.txt
+FOOLPROOF_GUIDE.md
+lessons_learnt.md
+check-*.js
+check-*.cjs
+test-*.js
+final-check.cjs
+fix-all-errors.cjs
+health-check.cjs
+serve-public.cjs
+fix-imports.sh
+test_gemini.py
+screenshot.mjs
+claude_*.md
+system_prompt_*.md
+vite
+.DS_Store
+check-console.js
+check-site.js
+package-lock.json # Ignoring lock file as yarn.lock exists 

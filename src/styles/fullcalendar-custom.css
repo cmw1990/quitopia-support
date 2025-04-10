@@ -1,0 +1,122 @@
+/* src/styles/fullcalendar-custom.css */
+
+/* Apply base theme variables for colors */
+.fc {
+    /* Use CSS variables defined in globals.css */
+    --fc-border-color: hsl(var(--border));
+    --fc-daygrid-event-dot-width: 8px;
+    --fc-list-event-dot-width: 10px;
+    --fc-event-bg-color: hsl(var(--primary) / 0.1); /* Default event background */
+    --fc-event-border-color: hsl(var(--primary) / 0.5); /* Default event border */
+    --fc-event-text-color: hsl(var(--primary-foreground)); /* Default event text */
+    --fc-event-selected-overlay-color: hsl(var(--primary) / 0.25);
+    --fc-more-link-bg-color: hsl(var(--muted));
+    --fc-more-link-text-color: hsl(var(--muted-foreground));
+    --fc-event-resizer-thickness: 8px;
+    --fc-event-resizer-dot-thickness: 4px;
+    --fc-event-resizer-dot-border-width: 1px;
+    --fc-highlight-color: hsl(var(--accent) / 0.2);
+    --fc-today-bg-color: hsl(var(--accent) / 0.1);
+    --fc-now-indicator-color: hsl(var(--destructive)); 
+}
+
+/* General appearance */
+.fc .fc-toolbar.fc-header-toolbar {
+    margin-bottom: 1rem;
+}
+
+.fc .fc-button {
+    background-color: var(--primary);
+    color: var(--primary-foreground);
+    font-size: 0.75rem;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+    height: auto;
+}
+
+.fc .fc-button:hover {
+    background-color: color-mix(in srgb, var(--primary) 90%, transparent);
+}
+
+.fc .fc-button-primary:disabled {
+    background-color: var(--muted);
+    color: var(--muted-foreground);
+}
+
+/* TimeGrid specific styles */
+.fc-timegrid-slot {
+    height: 2rem;
+}
+
+.fc .fc-timegrid-slot-label-cushion {
+    font-size: 0.75rem;
+    padding: 0.25rem;
+}
+
+.fc .fc-timegrid-slot.fc-slot-minor {
+    border-top-width: 1px;
+    border-top-style: dashed;
+    border-color: rgba(var(--border) / 0.5);
+}
+
+.fc .fc-timegrid-col.fc-day-today {
+    background-color: var(--fc-today-bg-color) !important; /* Ensure today background applies */
+}
+
+/* Event appearance */
+.fc-event.fc-event-easier-focus { /* Target events specifically in our TimeBlockingView */
+    border-radius: 0.25rem;
+    border-width: 1px;
+    font-size: 0.75rem;
+    padding: 0.25rem;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    cursor: grab;
+    /* Use variables set in taskToEvent function via style props */
+    /* background-color: var(--fc-event-bg-color); */
+    /* border-color: var(--fc-event-border-color); */
+    /* color: var(--fc-event-text-color); */
+    transition: transform 0.1s ease-out, box-shadow 0.1s ease-out;
+}
+
+.fc-event.fc-event-easier-focus:hover {
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+.fc-event.fc-event-dragging, 
+.fc-event.fc-event-resizing {
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    opacity: 0.8;
+    z-index: 10;
+}
+
+.fc-event .fc-event-main {
+    overflow: hidden;
+}
+
+.fc-event .fc-event-title {
+    white-space: normal;
+    word-wrap: break-word;
+    font-weight: 500;
+}
+
+/* DayGrid overrides if needed (not primary view) */
+.fc .fc-daygrid-day-number {
+    font-size: 0.75rem;
+    padding: 0.25rem;
+}
+
+/* Hide default header if using custom */
+.fc .fc-header-toolbar {
+    display: none;
+}
+
+/* Style the now indicator */
+.fc .fc-timegrid-now-indicator-line {
+    border-color: var(--fc-now-indicator-color);
+    border-width: 2px;
+}
+.fc .fc-timegrid-now-indicator-arrow {
+    border-top-color: var(--fc-now-indicator-color);
+} 

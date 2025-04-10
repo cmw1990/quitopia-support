@@ -1,0 +1,13 @@
+.progress-bar {
+  width: 100%;
+  background-color: rgb(229 231 235); /* bg-gray-200 */
+  border-radius: 9999px; /* rounded-full */
+  height: 0.5rem; /* h-2 */
+}
+
+.progress-bar-fill {
+  background-color: rgb(168 85 247); /* bg-purple-500 */
+  border-radius: 9999px; /* rounded-full */
+  height: 0.5rem; /* h-2 */
+  transition: width 0.3s ease-in-out;
+}

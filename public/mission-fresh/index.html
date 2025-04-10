@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mission Fresh Status</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #4f9a94, #38b2ac);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+    }
+    .container {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 40px;
+      max-width: 600px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      margin-top: 0;
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+    p {
+      font-size: 1.1rem;
+      margin-bottom: 2rem;
+      line-height: 1.6;
+    }
+    .button {
+      background: white;
+      color: #38b2ac;
+      font-weight: bold;
+      padding: 12px 24px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 1.1rem;
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+      display: inline-block;
+      margin: 0 10px;
+    }
+    .button:hover {
+      background: #f8f9fa;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    .status {
+      margin-top: 30px;
+      background: rgba(0, 0, 0, 0.1);
+      padding: 15px;
+      border-radius: 8px;
+      text-align: left;
+    }
+    .code {
+      font-family: monospace;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 2px 5px;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Mission Fresh</h1>
+    <p>The Mission Fresh application is currently facing some start-up issues with Babel plugins. Our team is working to resolve this issue.</p>
+    
+    <a href="/easier-focus/" class="button">Back to Easier Focus</a>
+    
+    <div class="status">
+      <h3>Current Status:</h3>
+      <p>
+        Error: <span class="code">Cannot find package '@babel/plugin-transform-react-jsx'</span>
+      </p>
+      <p>
+        The server is attempting to access this package, but network issues or missing dependencies are preventing it from loading.
+      </p>
+      <p>
+        Please continue using the Easier Focus application for now. Mission Fresh will be available shortly.
+      </p>
+    </div>
+  </div>
+</body>
+</html> 

@@ -1,0 +1,186 @@
+/* src/components/tasks/TimeBlockingView.css */
+
+/* Define theme variables for light and dark mode */
+:root {
+    /* Light Mode Defaults (Tailwind/Shadcn Inspired) */
+    --fc-border-color: hsl(214.3, 31.8%, 91.4%); /* border */
+    --fc-bg-color-default: hsl(0 0% 100%); /* background */
+    --fc-text-color-primary: hsl(222.2 84% 4.9%); /* foreground */
+    --fc-text-color-muted: hsl(215.4 16.3% 46.9%); /* muted-foreground */
+    --fc-accent-color: hsl(221.2 83.2% 53.3%); /* primary */
+    --fc-accent-text-color: hsl(60 9.1% 97.8%); /* primary-foreground */
+
+    /* Easier Focus Specific Calendar Styles */
+    --fc-today-bg-color: hsl(210 40% 98%);
+    --fc-slot-label-text-color: hsl(215.4 16.3% 46.9%);
+    --fc-day-header-text-color: hsl(222.2 47.4% 11.2%);
+    --fc-now-indicator-color: hsl(0 84.2% 60.2%); /* destructive */
+    
+    /* Event Priority Colors (Light) */
+    --fc-event-bg-red: hsl(0 72.2% 50.6% / 0.1);
+    --fc-event-border-red: hsl(0 72.2% 50.6% / 0.4);
+    --fc-event-text-red: hsl(0 72.2% 50.6%);
+    --fc-event-bg-yellow: hsl(47.9 95.8% 53.1% / 0.1);
+    --fc-event-border-yellow: hsl(47.9 95.8% 53.1% / 0.4);
+    --fc-event-text-yellow: hsl(47.9 95.8% 53.1%);
+    --fc-event-bg-blue: hsl(221.2 83.2% 53.3% / 0.1);
+    --fc-event-border-blue: hsl(221.2 83.2% 53.3% / 0.4);
+    --fc-event-text-blue: hsl(221.2 83.2% 53.3%);
+    --fc-event-bg-default: hsl(210 40% 96.1% / 0.8); /* muted */
+    --fc-event-border-default: hsl(214.3 31.8% 91.4% / 0.9); /* border */
+    --fc-event-text-default: hsl(215.4 16.3% 46.9%); /* muted-foreground */
+}
+
+.dark {
+    /* Dark Mode Overrides (Tailwind/Shadcn Inspired) */
+    --fc-border-color: hsl(217.2 32.6% 17.5%); /* border */
+    --fc-bg-color-default: hsl(222.2 84% 4.9%); /* background */
+    --fc-text-color-primary: hsl(60 9.1% 97.8%); /* foreground */
+    --fc-text-color-muted: hsl(217.2 32.6% 17.5%); /* muted-foreground */
+    --fc-accent-color: hsl(60 9.1% 97.8%); /* primary (adjust if needed) */
+    --fc-accent-text-color: hsl(210 40% 9.8%); /* primary-foreground */
+
+    /* Easier Focus Specific Calendar Styles (Dark) */
+    --fc-today-bg-color: hsl(217.2 32.6% 17.5% / 0.5);
+    --fc-slot-label-text-color: hsl(215 20.2% 65.1%);
+    --fc-day-header-text-color: hsl(60 9.1% 97.8%);
+    --fc-now-indicator-color: hsl(0 72.2% 50.6%); /* destructive */
+    
+    /* Event Priority Colors (Dark) */
+    --fc-event-bg-red: hsl(0 62.8% 30.6% / 0.2);
+    --fc-event-border-red: hsl(0 62.8% 30.6% / 0.6);
+    --fc-event-text-red: hsl(0 84.2% 60.2%); 
+    --fc-event-bg-yellow: hsl(47.9 95.8% 23.1% / 0.2); /* Adjusted yellow for dark */
+    --fc-event-border-yellow: hsl(47.9 95.8% 23.1% / 0.6);
+    --fc-event-text-yellow: hsl(47.9 95.8% 53.1%);
+    --fc-event-bg-blue: hsl(217.2 91.2% 28.2% / 0.2);
+    --fc-event-border-blue: hsl(217.2 91.2% 28.2% / 0.6);
+    --fc-event-text-blue: hsl(217.2 91.2% 59.8%);
+    --fc-event-bg-default: hsl(217.2 32.6% 17.5% / 0.8); /* muted */
+    --fc-event-border-default: hsl(217.2 32.6% 17.5% / 0.9); /* border */
+    --fc-event-text-default: hsl(215 20.2% 65.1%); /* muted-foreground */
+}
+
+/* General Calendar Wrapper Styling */
+.easier-focus-calendar-wrapper .fc {
+    /* Use CSS variables defined above */
+    --fc-border-color: var(--fc-border-color);
+    --fc-daygrid-event-dot-width: 8px;
+    --fc-list-event-dot-width: 10px;
+    --fc-event-text-color: var(--fc-text-color-primary); /* Default event text */
+    --fc-more-link-bg-color: var(--fc-bg-color-default);
+    --fc-more-link-text-color: var(--fc-accent-color);
+    --fc-event-bg-color: var(--fc-event-bg-default); /* Default event background */
+    --fc-event-border-color: var(--fc-event-border-default); /* Default event border */
+    --fc-now-indicator-color: var(--fc-now-indicator-color);
+    --fc-today-bg-color: var(--fc-today-bg-color);
+    --fc-highlight-color: hsl(var(--primary) / 0.1); /* Selection highlight */
+
+    font-family: inherit; /* Inherit font from the app */
+    font-size: 0.875rem; /* ~14px, adjust as needed */
+}
+
+/* Toolbar / Header (Using Shadcn, less styling needed here) */
+.easier-focus-calendar-wrapper .fc .fc-toolbar {
+   margin-bottom: 0.5em !important; /* Match Shadcn spacing */
+}
+
+/* Day Headers (Week/Day/Month) */
+.easier-focus-calendar-wrapper .fc-header-easier-focus .fc-col-header-cell-cushion {
+    color: var(--fc-day-header-text-color);
+    font-weight: 500;
+    font-size: 0.75rem; /* ~12px */
+    text-transform: uppercase;
+    padding: 0.5rem 0.25rem;
+}
+
+/* Timegrid Slot Labels (e.g., 9:00 AM) */
+.easier-focus-calendar-wrapper .fc-slot-label-easier-focus .fc-timegrid-slot-label-cushion {
+    color: var(--fc-slot-label-text-color);
+    font-size: 0.7rem; /* ~11px */
+    padding: 0 0.3rem;
+}
+
+/* Timegrid Lines */
+.easier-focus-calendar-wrapper .fc-timegrid-slot-lane, 
+.easier-focus-calendar-wrapper .fc-timegrid-slot {
+    border-color: var(--fc-border-color) !important; 
+}
+.easier-focus-calendar-wrapper .fc-timegrid-slots tr > td {
+    border-bottom: none; /* Remove default bottom borders if redundant */
+}
+
+/* Event Styling */
+.easier-focus-calendar-wrapper .fc-event.fc-event-easier-focus {
+    border-width: 1px;
+    border-style: solid;
+    padding: 3px 5px;
+    font-size: 0.75rem; /* ~12px */
+    line-height: 1.3;
+    border-radius: 4px; /* Slightly rounded corners */
+    box-shadow: none; /* Remove default shadow if any */
+    cursor: grab;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+    overflow: hidden; /* Prevent text overflow issues */
+}
+
+/* Event Title */
+.easier-focus-calendar-wrapper .fc-event.fc-event-easier-focus .fc-event-title {
+    font-weight: 500;
+    white-space: nowrap; 
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Event Time */
+.easier-focus-calendar-wrapper .fc-event.fc-event-easier-focus .fc-event-time {
+    font-size: 0.7rem; /* ~11px */
+    opacity: 0.8;
+}
+
+/* Specific Priority Event Styling (using variables set in JS) */
+.easier-focus-calendar-wrapper .fc-event.fc-event-priority-high {
+    /* Variables applied via JS 'backgroundColor', 'borderColor', 'textColor' */
+}
+.easier-focus-calendar-wrapper .fc-event.fc-event-priority-medium {
+    /* Variables applied via JS 'backgroundColor', 'borderColor', 'textColor' */
+}
+.easier-focus-calendar-wrapper .fc-event.fc-event-priority-low {
+    /* Variables applied via JS 'backgroundColor', 'borderColor', 'textColor' */
+}
+.easier-focus-calendar-wrapper .fc-event.fc-event-priority-default {
+    /* Variables applied via JS 'backgroundColor', 'borderColor', 'textColor' */
+}
+
+/* Today Background */
+.easier-focus-calendar-wrapper .fc-day-today {
+    background-color: var(--fc-today-bg-color) !important;
+}
+
+/* Now Indicator */
+.easier-focus-calendar-wrapper .fc-timegrid-now-indicator-line {
+    border-color: var(--fc-now-indicator-color);
+    border-width: 2px; /* Make it slightly thicker */
+}
+.easier-focus-calendar-wrapper .fc-timegrid-now-indicator-arrow {
+    border-top-color: var(--fc-now-indicator-color);
+}
+
+/* Adjust scrollbar for webkit browsers */
+.easier-focus-calendar-wrapper .fc-scroller::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.easier-focus-calendar-wrapper .fc-scroller::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.easier-focus-calendar-wrapper .fc-scroller::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 3px;
+}
+
+.easier-focus-calendar-wrapper .fc-scroller::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground));
+} 

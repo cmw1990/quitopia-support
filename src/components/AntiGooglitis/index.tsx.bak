@@ -1,0 +1,2338 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
+import { Button } from '../ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
+import { Switch } from '../ui/switch';
+import { Slider } from '../ui/slider';
+import { Input } from '../ui/input';
+import { Badge } from '../ui/badge';
+import { Textarea } from '../ui/textarea';
+import {
+  Search,
+  AlertTriangle,
+  Book,
+  BookOpen,
+  Brain,
+  Clock,
+  Calendar,
+  CheckCircle,
+  Settings,
+  Shield,
+  Activity,
+  X,
+  Eye,
+  EyeOff,
+  ChevronRight,
+  Plus,
+  Trash,
+  Edit,
+  Save,
+  AlarmClock,
+  BarChart,
+  LineChart,
+  PieChart,
+  Sparkles,
+  Zap,
+  Focus,
+  Timer,
+  Lock,
+  BellOff,
+  Coffee,
+  RefreshCcw,
+  CalendarClock,
+  Globe,
+  ListFilter,
+  Link,
+  MoreHorizontal,
+  AlertCircle,
+  LightbulbIcon,
+  BrainCircuit,
+  Gauge,
+  Puzzle,
+  Milestone,
+  History,
+  Award,
+  TrendingUp,
+  Filter,
+  ArrowLeftRight,
+  Heart,
+  BarChart3,
+  BellRing,
+  Sunrise,
+  Sunset,
+  Leaf,
+  Hourglass,
+  Laptop,
+  Smartphone,
+  Cpu,
+  RotateCw,
+  DollarSign,
+  LifeBuoy,
+  ThumbsUp,
+  Mountain,
+  BarChart2,
+  Flag
+} from 'lucide-react';
+import { toast } from 'sonner';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { Checkbox } from '../ui/checkbox';
+import { Label } from '../ui/label';
+import { Progress } from '../ui/progress';
+import { supabaseRestCall } from '../../api/supabase-rest';
+import { useAuth } from '../AuthProvider';
+import { handleError } from '../../utils/error-handler';
+import {
+  SearchPattern,
+  SearchAlternative,
+  GoogleBlockSettings,
+  getGoogleBlockSettings,
+  saveGoogleBlockSettings,
+  getSearchPatterns,
+  saveSearchPattern,
+  deleteSearchPattern,
+  getSearchAlternatives,
+  getGoogleBlockStats,
+  updateGoogleBlockStats,
+  GoogleBlockStats
+} from './api/google-api';
+
+// Import adaptive learning features
+import {
+  DistractionPattern,
+  DistractionInsight,
+  AdaptiveBlockingRule,
+  DistractionMetrics,
+  getDistractionPatterns,
+  saveDistractionPattern,
+  updateDistractionPattern,
+  getDistractionInsights,
+  saveDistractionInsight,
+  getAdaptiveBlockingRules,
+  saveAdaptiveBlockingRule,
+  updateAdaptiveBlockingRule,
+  getDistractionMetrics,
+  generateDistractionInsights,
+  applyBlockingRecommendation,
+  logDistractionEvent
+} from './api/adaptive-learning';
+
+// Format time remaining for display
+const formatTimeRemaining = (seconds: number): string => {
+  if (!seconds && seconds !== 0) return "00:00";
+  
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+  return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+};
+
+// Define pattern analysis type for Deep Work mode
+interface PatternAnalysis {
+  peakDistractionTimes: string[];
+  recommendedBlockTimes: string[];
+  mostProductiveDay: string;
+  distractionTriggers: string[];
+}
+
+// Add type for Deep Work achievements and statistics
+interface DeepWorkStats {
+  totalSessions: number;
+  totalMinutes: number;
+  longestSession: number;
+  avgSessionLength: number;
+  completionRate: number;
+  lastCompletedTimestamp?: string;
+  currentStreak: number;
+  achievements: DeepWorkAchievement[];
+}
+
+interface DeepWorkAchievement {
+  id: string;
+  name: string;
+  description: string;
+  completed: boolean;
+  completedTimestamp?: string;
+  progress: number;
+  goal: number;
+  icon: string;
+}
+
+// Add these helper types for our component's internal state tracking
+interface ExtendedGoogleBlockStats extends GoogleBlockStats {
+  timesSaved: number;
+  productivityGain: number;
+  topDistraction: string;
+  weeklyTrend: number[];
+}
+
+// Add Digital Wellness models and types
+interface DigitalWellnessScore {
+  overall: number;
+  balance: number;
+  mindfulness: number;
+  healthyHabits: number;
+  weeklyTrend: number[];
+}
+
+interface WellnessRecommendation {
+  id: string;
+  title: string;
+  description: string;
+  category: 'balance' | 'mindfulness' | 'habits' | 'productivity';
+  difficulty: 'easy' | 'medium' | 'hard';
+  estimatedTimeMin: number;
+  impact: number;
+}
+
+interface PredictiveModel {
+  trainingStatus: 'not_started' | 'in_progress' | 'complete';
+  accuracy: number;
+  lastUpdated: string;
+  nextPredictedDistraction: {
+    time: string;
+    type: string;
+    confidence: number;
+  } | null;
+  preventiveActions: string[];
+}
+
+export function AntiGooglitis() {
+  const { user, session } = useAuth();
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [patternLoading, setPatternLoading] = useState(false);
+  const [alternativeLoading, setAlternativeLoading] = useState(false);
+  
+  // Settings state
+  const [settings, setSettings] = useState<GoogleBlockSettings>({
+    enabled: false,
+    blockLevel: 'moderate',
+    scheduledHours: [],
+    allowedSearches: [],
+    focusQuestions: [],
+    redirectTo: '',
+    deepWorkMode: false,
+    deepWorkDuration: 90,
+    notificationBlocking: false,
+    keywordBlocking: false,
+    blockSocialMedia: false,
+    customBlockedDomains: [],
+    intensityLevel: 5
+  });
+  
+  // Stats and data
+  const [searchPatterns, setSearchPatterns] = useState<SearchPattern[]>([]);
+  const [alternatives, setAlternatives] = useState<SearchAlternative[]>([]);
+  const [stats, setStats] = useState<ExtendedGoogleBlockStats>({
+    searchesBlocked: 0,
+    timeWasted: 0,
+    topDistractingPatterns: [],
+    weeklyData: [],
+    categoriesData: [],
+    timesSaved: 0,
+    productivityGain: 0,
+    topDistraction: '',
+    weeklyTrend: []
+  });
+  
+  // New pattern/alternative state
+  const [newPattern, setNewPattern] = useState('');
+  const [newPatternCategory, setNewPatternCategory] = useState<SearchPattern['category']>('distraction');
+  const [newAlternative, setNewAlternative] = useState<Omit<SearchAlternative, 'id'>>({
+    title: '',
+    description: '',
+    url: '',
+    category: 'productivity'
+  });
+  const [editingScheduleIndex, setEditingScheduleIndex] = useState<number | null>(null);
+  const [newSchedule, setNewSchedule] = useState({
+    start: '09:00',
+    end: '17:00',
+    days: ['mon', 'tue', 'wed', 'thu', 'fri'] as ('mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun')[]
+  });
+  
+  // New focus question
+  const [newQuestion, setNewQuestion] = useState('');
+  
+  // New allowed search
+  const [newAllowedSearch, setNewAllowedSearch] = useState('');
+  
+  // Add state for Deep Work session
+  const [deepWorkActive, setDeepWorkActive] = useState(false);
+  const [deepWorkTimeRemaining, setDeepWorkTimeRemaining] = useState(0);
+  const [deepWorkInterval, setDeepWorkInterval] = useState<NodeJS.Timeout | null>(null);
+  const [deepWorkFlowState, setDeepWorkFlowState] = useState(0); // 0-100 flow state level
+  const [deepWorkStats, setDeepWorkStats] = useState<DeepWorkStats>({
+    totalSessions: 0,
+    totalMinutes: 0,
+    longestSession: 0,
+    avgSessionLength: 0,
+    completionRate: 0,
+    currentStreak: 0,
+    achievements: [
+      {
+        id: 'first-deep',
+        name: 'Deep Diver',
+        description: 'Complete your first Deep Work session',
+        completed: false,
+        progress: 0,
+        goal: 1,
+        icon: 'milestone'
+      },
+      {
+        id: 'deep-streak',
+        name: 'Focus Streak',
+        description: 'Complete Deep Work sessions on 3 consecutive days',
+        completed: false,
+        progress: 0,
+        goal: 3,
+        icon: 'trending-up'
+      },
+      {
+        id: 'deep-hour',
+        name: 'Power Hour',
+        description: 'Accumulate 60 minutes of Deep Work',
+        completed: false,
+        progress: 0,
+        goal: 60,
+        icon: 'hourglass'
+      },
+      {
+        id: 'deep-master',
+        name: 'Deep Work Master',
+        description: 'Complete a 90+ minute Deep Work session',
+        completed: false,
+        progress: 0,
+        goal: 90,
+        icon: 'award'
+      }
+    ]
+  });
+  
+  // Add state for pattern analysis
+  const [patternAnalysis, setPatternAnalysis] = useState<PatternAnalysis>({
+    peakDistractionTimes: ['10:00 AM - 11:00 AM', '2:30 PM - 3:30 PM', '7:00 PM - 8:00 PM'],
+    recommendedBlockTimes: ['8:30 AM - 10:00 AM', '11:30 AM - 1:00 PM', '4:00 PM - 5:30 PM'],
+    mostProductiveDay: 'Tuesday',
+    distractionTriggers: ['Email checking', 'Social media', 'News websites', 'YouTube']
+  });
+  
+  // Adaptive learning state
+  const [distractionPatterns, setDistractionPatterns] = useState<DistractionPattern[]>([]);
+  const [distractionInsights, setDistractionInsights] = useState<DistractionInsight[]>([]);
+  const [blockingRules, setBlockingRules] = useState<AdaptiveBlockingRule[]>([]);
+  const [distractionMetrics, setDistractionMetrics] = useState<DistractionMetrics | null>(null);
+  const [insightsLoading, setInsightsLoading] = useState(false);
+  const [metricsLoading, setMetricsLoading] = useState(false);
+  const [metricsTimeRange, setMetricsTimeRange] = useState<string>('30d');
+  const [adaptiveLearningEnabled, setAdaptiveLearningEnabled] = useState(true);
+  const [newDistractionPattern, setNewDistractionPattern] = useState({
+    pattern_type: 'website' as DistractionPattern['pattern_type'],
+    pattern_value: '',
+    context: [],
+    impact_level: 5
+  });
+  const [contextOptions] = useState([
+    'Work', 'Study', 'Home', 'Coffee Shop', 'Commuting', 'Meeting', 'Break Time', 'Evening', 'Weekend'
+  ]);
+  
+  // Add new state for digital wellness features
+  const [wellnessScore, setWellnessScore] = useState<DigitalWellnessScore>({
+    overall: 68,
+    balance: 72,
+    mindfulness: 65,
+    healthyHabits: 58,
+    weeklyTrend: [62, 64, 67, 65, 70, 71, 68]
+  });
+  
+  const [recommendations, setRecommendations] = useState<WellnessRecommendation[]>([
+    {
+      id: '1',
+      title: 'Digital Sunset Ritual',
+      description: 'Set a time each evening to disconnect from devices, allowing your mind to wind down before sleep.',
+      category: 'habits',
+      difficulty: 'medium',
+      estimatedTimeMin: 60,
+      impact: 8
+    },
+    {
+      id: '2',
+      title: 'Mindful Browser Extension',
+      description: 'Install a browser extension that prompts you to take deep breaths before visiting potentially distracting websites.',
+      category: 'mindfulness',
+      difficulty: 'easy',
+      estimatedTimeMin: 5,
+      impact: 6
+    },
+    {
+      id: '3',
+      title: 'Tech-Free Zones',
+      description: 'Designate certain areas in your home as device-free to create spaces for presence and recovery.',
+      category: 'balance',
+      difficulty: 'medium',
+      estimatedTimeMin: 30,
+      impact: 7
+    },
+    {
+      id: '4',
+      title: 'Focus Batching',
+      description: 'Schedule specific times for checking emails, messages, and notifications instead of responding immediately.',
+      category: 'productivity',
+      difficulty: 'hard',
+      estimatedTimeMin: 90,
+      impact: 9
+    }
+  ]);
+  
+  const [predictiveModel, setPredictiveModel] = useState<PredictiveModel>({
+    trainingStatus: 'complete',
+    accuracy: 83,
+    lastUpdated: '2023-03-24T18:30:00',
+    nextPredictedDistraction: {
+      time: '11:45 AM',
+      type: 'Social Media',
+      confidence: 78
+    },
+    preventiveActions: [
+      'Start a focused Pomodoro session at 11:30 AM',
+      'Switch to offline work mode',
+      'Use website blocker for social media sites'
+    ]
+  });
+  
+  const [detoxProgress, setDetoxProgress] = useState({
+    currentStreak: 5,
+    longestStreak: 12,
+    totalCompletedDetoxes: 18,
+    currentDetoxEnd: '2023-03-28T20:00:00'
+  });
+  
+  // Load data from Supabase
+  useEffect(() => {
+    if (user && session) {
+      loadUserData();
+    } else {
+      // Use demo data for non-logged in users
+      loadDemoData();
+    }
+  }, [user, session]);
+  
+  const loadUserData = async () => {
+    setLoading(true);
+    try {
+      if (!user || !session) {
+        loadDemoData();
+        return;
+      }
+
+      // Load settings
+      const settingsData = await getGoogleBlockSettings(session);
+      if (settingsData) {
+        setSettings(settingsData);
+      }
+      
+      // Load search patterns
+      const patternsData = await getSearchPatterns(session);
+      if (patternsData) {
+        setSearchPatterns(patternsData);
+      }
+      
+      // Load alternatives
+      const alternativesData = await getSearchAlternatives(session);
+      if (alternativesData) {
+        setAlternatives(alternativesData);
+      }
+      
+      // Load stats
+      const statsData = await getGoogleBlockStats(session);
+      if (statsData) {
+        setStats(statsData);
+      }
+    } catch (error) {
+      handleError(
+        error,
+        'AntiGooglitis.loadUserData',
+        'Failed to load AntiGooglitis data',
+        {
+          silent: false,
+          critical: true,
+          extraData: { userId: user?.id }
+        }
+      );
+      loadDemoData(); // Fallback to demo data
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const loadDemoData = () => {
+    // Load demo search patterns
+    setSearchPatterns([
+      {
+        id: '1',
+        user_id: 'demo-user',
+        pattern: 'social media',
+        category: 'distraction',
+        timeWasted: 240,
+        occurrences: 45,
+        timestamp: new Date().toISOString()
+      },
+      {
+        id: '2',
+        user_id: 'demo-user',
+        pattern: 'youtube funny',
+        category: 'distraction',
+        timeWasted: 180,
+        occurrences: 32,
+        timestamp: new Date().toISOString()
+      },
+      {
+        id: '3',
+        user_id: 'demo-user',
+        pattern: 'project documentation',
+        category: 'work',
+        timeWasted: 0,
+        occurrences: 28,
+        timestamp: new Date().toISOString()
+      }
+    ]);
+    
+    // Load demo alternatives
+    setAlternatives([
+      {
+        id: '1',
+        title: 'Focused Research Tool',
+        description: 'A search engine designed for deep research without distractions',
+        url: 'https://scholar.google.com',
+        category: 'research'
+      },
+      {
+        id: '2',
+        title: 'Documentation Hub',
+        description: 'Direct access to programming documentation',
+        url: 'https://devdocs.io',
+        category: 'programming'
+      },
+      {
+        id: '3',
+        title: 'Mindful Browsing Extension',
+        description: 'Browser extension that helps you stay focused',
+        url: 'https://www.mindfulbrowsing.org',
+        category: 'productivity'
+      }
+    ]);
+    
+    // Demo stats
+    setStats({
+      searchesBlocked: 125,
+      timeWasted: 520, // minutes
+      topDistractingPatterns: ['social media', 'news', 'entertainment'],
+      weeklyData: [],
+      categoriesData: [],
+      timesSaved: 520, // minutes
+      productivityGain: 28, // percentage
+      topDistraction: 'social media',
+      weeklyTrend: [20, 18, 15, 12, 10, 8, 7]
+    });
+    
+    setLoading(false);
+  };
+  
+  // Save settings to Supabase
+  const saveSettings = async (updatedSettings?: GoogleBlockSettings) => {
+    setSaving(true);
+    const settingsToSave = updatedSettings || settings;
+    
+    try {
+      if (user && session) {
+        await saveGoogleBlockSettings(settingsToSave, session);
+        toast("Settings saved successfully", { 
+          description: "Your Anti-Googlitis settings have been updated." 
+        });
+      } else {
+        // Demo mode - just update local state
+        setSettings(settingsToSave);
+        toast("Demo mode: Settings updated", {
+          description: "In demo mode, settings are not persisted."
+        });
+      }
+    } catch (error) {
+      handleError(
+        error,
+        'AntiGooglitis.saveSettings',
+        'Failed to save settings',
+        {
+          silent: false,
+          critical: false,
+          extraData: { settings: settingsToSave }
+        }
+      );
+      toast("Failed to save settings", {
+        description: "Please try again or check your connection."
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+  
+  // Toggle block feature
+  const toggleBlock = () => {
+    setSettings(prev => ({
+      ...prev,
+      enabled: !prev.enabled
+    }));
+  };
+  
+  // Save after settings change
+  useEffect(() => {
+    if (!loading && user && session) {
+      const timer = setTimeout(() => {
+        saveSettings();
+      }, 1000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [settings]);
+  
+  // Add a new pattern
+  const addPattern = async () => {
+    if (!newPattern.trim()) return;
+    
+    const pattern: SearchPattern = {
+      id: crypto.randomUUID(),
+      user_id: user?.id || 'demo-user',
+      pattern: newPattern,
+      category: newPatternCategory as any,
+      timeWasted: 0,
+      occurrences: 1,
+      timestamp: new Date().toISOString()
+    };
+    
+    setPatternLoading(true);
+    try {
+      if (user && session) {
+        await saveSearchPattern(pattern, session);
+      }
+      setSearchPatterns(prev => [pattern, ...prev]);
+      setNewPattern('');
+      toast.success('Pattern added!');
+    } catch (error) {
+      handleError(
+        error,
+        'AntiGooglitis.addPattern',
+        'Failed to add pattern',
+        {
+          retry: () => addPattern(),
+          extraData: { userId: user?.id, pattern }
+        }
+      );
+    } finally {
+      setPatternLoading(false);
+    }
+  };
+  
+  // Add a new alternative
+  const addAlternative = async () => {
+    if (!newAlternative.title.trim() || !newAlternative.url.trim()) return;
+    
+    const alternative: SearchAlternative = {
+      ...newAlternative,
+      id: Date.now().toString()
+    };
+    
+    setAlternativeLoading(true);
+    // Only try to save to Supabase if user is logged in
+    if (user && session) {
+      try {
+        // Use the proper API function
+        await supabaseRestCall(
+          '/rest/v1/search_alternatives8',
+          {
+            method: 'POST',
+            body: JSON.stringify(alternative)
+          },
+          session
+        );
+      } catch (error) {
+        handleError(
+          error,
+          'AntiGooglitis.addAlternative',
+          'Failed to save alternative',
+          {
+            retry: () => addAlternative(),
+            extraData: { userId: user?.id, alternative }
+          }
+        );
+        setAlternativeLoading(false);
+        return;
+      }
+    }
+    
+    setAlternatives(prev => [alternative, ...prev]);
+    setNewAlternative({
+      title: '',
+      description: '',
+      url: '',
+      category: 'productivity'
+    });
+    
+    toast.success('Alternative added!');
+    setAlternativeLoading(false);
+  };
+  
+  // Add a new schedule
+  const addSchedule = () => {
+    if (editingScheduleIndex !== null) {
+      // Update existing schedule
+      setSettings(prev => ({
+        ...prev,
+        scheduledHours: prev.scheduledHours.map((schedule, index) => 
+          index === editingScheduleIndex ? newSchedule : schedule
+        )
+      }));
+      setEditingScheduleIndex(null);
+    } else {
+      // Add new schedule
+      setSettings(prev => ({
+        ...prev,
+        scheduledHours: [...prev.scheduledHours, newSchedule]
+      }));
+    }
+    
+    setNewSchedule({
+      start: '09:00',
+      end: '17:00',
+      days: ['mon', 'tue', 'wed', 'thu', 'fri']
+    });
+  };
+  
+  // Delete a schedule
+  const deleteSchedule = (index: number) => {
+    setSettings(prev => ({
+      ...prev,
+      scheduledHours: prev.scheduledHours.filter((_, i) => i !== index)
+    }));
+  };
+  
+  // Edit a schedule
+  const editSchedule = (index: number) => {
+    setNewSchedule(settings.scheduledHours[index]);
+    setEditingScheduleIndex(index);
+  };
+  
+  // Add a new focus question
+  const addFocusQuestion = () => {
+    if (!newQuestion.trim()) return;
+    
+    setSettings(prev => ({
+      ...prev,
+      focusQuestions: [...prev.focusQuestions, newQuestion]
+    }));
+    
+    setNewQuestion('');
+  };
+  
+  // Delete a focus question
+  const deleteFocusQuestion = (index: number) => {
+    setSettings(prev => ({
+      ...prev,
+      focusQuestions: prev.focusQuestions.filter((_, i) => i !== index)
+    }));
+  };
+  
+  // Add a new allowed search
+  const addAllowedSearch = () => {
+    if (!newAllowedSearch.trim()) return;
+    
+    setSettings(prev => ({
+      ...prev,
+      allowedSearches: [...prev.allowedSearches, newAllowedSearch]
+    }));
+    
+    setNewAllowedSearch('');
+  };
+  
+  // Delete an allowed search
+  const deleteAllowedSearch = (index: number) => {
+    setSettings(prev => ({
+      ...prev,
+      allowedSearches: prev.allowedSearches.filter((_, i) => i !== index)
+    }));
+  };
+  
+  // Delete a pattern
+  const deletePattern = async (patternId: string) => {
+    setPatternLoading(true);
+    try {
+      if (user && session) {
+        await deleteSearchPattern(patternId, session);
+      }
+      setSearchPatterns(prev => prev.filter(p => p.id !== patternId));
+      toast.success('Pattern deleted successfully');
+    } catch (error) {
+      handleError(
+        error,
+        'AntiGooglitis.deletePattern',
+        'Failed to delete pattern',
+        {
+          retry: () => deletePattern(patternId),
+          extraData: { userId: user?.id, patternId }
+        }
+      );
+    } finally {
+      setPatternLoading(false);
+    }
+  };
+  
+  // Start deep work session
+  const startDeepWork = () => {
+    const duration = settings.deepWorkDuration || 90; // Default to 90 minutes if not set
+    const timeInSeconds = duration * 60;
+    
+    setDeepWorkActive(true);
+    setDeepWorkTimeRemaining(timeInSeconds);
+    setDeepWorkFlowState(0); // Reset flow state
+    
+    // Start the timer
+    const interval = setInterval(() => {
+      setDeepWorkTimeRemaining(prev => {
+        if (prev <= 1) {
+          endDeepWork(true); // Completed successfully
+          return 0;
+        }
+        
+        // Occasionally update flow state to simulate flow development
+        if (prev % 60 === 0) {
+          updateFlowState();
+        }
+        
+        return prev - 1;
+      });
+    }, 1000);
+    
+    setDeepWorkInterval(interval);
+    
+    // Update settings to enable maximum blocking
+    const updatedSettings: GoogleBlockSettings = {
+      ...settings,
+      enabled: true,
+      blockLevel: 'strict',
+      deepWorkMode: true
+    };
+    
+    setSettings(updatedSettings);
+    saveSettings(updatedSettings);
+    
+    toast.success('Deep Work mode activated! Focusing for ' + duration + ' minutes.');
+  };
+  
+  // Update flow state during deep work session
+  const updateFlowState = () => {
+    // Simulate a gradual increase in flow state with occasional fluctuations
+    setDeepWorkFlowState(prev => {
+      // Calculate minutes passed
+      const duration = settings.deepWorkDuration || 90;
+      const minutesPassed = duration - Math.floor(deepWorkTimeRemaining / 60);
+      
+      // Flow starts low, builds up, and then stabilizes
+      let base = Math.min(75, minutesPassed * 2.5); // Gradually increase
+      
+      // Add some randomness
+      const randomFactor = Math.random() * 10 - 5; // -5 to +5
+      
+      // Ensure flow stays between 0-100
+      return Math.max(0, Math.min(100, base + randomFactor));
+    });
+  };
+  
+  // End deep work session
+  const endDeepWork = (completed = false) => {
+    if (deepWorkInterval) {
+      clearInterval(deepWorkInterval);
+    }
+    
+    setDeepWorkActive(false);
+    setDeepWorkInterval(null);
+    
+    // Reset settings to normal
+    const updatedSettings: GoogleBlockSettings = {
+      ...settings,
+      deepWorkMode: false
+    };
+    
+    setSettings(updatedSettings);
+    saveSettings(updatedSettings);
+    
+    // Record stats for session
+    if (settings.deepWorkDuration) {
+      const minutesCompleted = completed 
+        ? settings.deepWorkDuration 
+        : Math.floor((settings.deepWorkDuration * 60 - deepWorkTimeRemaining) / 60);
+      
+      // Update deep work stats
+      const updatedDeepWorkStats = { ...deepWorkStats };
+      updatedDeepWorkStats.totalSessions += 1;
+      updatedDeepWorkStats.totalMinutes += minutesCompleted;
+      
+      if (completed) {
+        updatedDeepWorkStats.completionRate = 
+          ((updatedDeepWorkStats.completionRate * (updatedDeepWorkStats.totalSessions - 1)) + 100) / 
+          updatedDeepWorkStats.totalSessions;
+          
+        // Check for streak
+        const now = new Date();
+        const lastCompletedDate = updatedDeepWorkStats.lastCompletedTimestamp 
+          ? new Date(updatedDeepWorkStats.lastCompletedTimestamp) 
+          : null;
+        
+        if (lastCompletedDate) {
+          const isYesterday = 
+            now.getDate() - lastCompletedDate.getDate() === 1 || 
+            (now.getDate() === 1 && 
+              (lastCompletedDate.getMonth() === now.getMonth() - 1 || 
+               (now.getMonth() === 0 && lastCompletedDate.getMonth() === 11)));
+          
+          if (isYesterday) {
+            updatedDeepWorkStats.currentStreak += 1;
+          } else if (
+            now.getDate() !== lastCompletedDate.getDate() || 
+            now.getMonth() !== lastCompletedDate.getMonth() || 
+            now.getFullYear() !== lastCompletedDate.getFullYear()
+          ) {
+            // Reset streak if not yesterday and not today
+            updatedDeepWorkStats.currentStreak = 1;
+          }
+        } else {
+          updatedDeepWorkStats.currentStreak = 1;
+        }
+        
+        updatedDeepWorkStats.lastCompletedTimestamp = now.toISOString();
+      } else {
+        updatedDeepWorkStats.completionRate = 
+          ((updatedDeepWorkStats.completionRate * (updatedDeepWorkStats.totalSessions - 1))) / 
+          updatedDeepWorkStats.totalSessions;
+      }
+      
+      // Update longest session
+      if (minutesCompleted > updatedDeepWorkStats.longestSession) {
+        updatedDeepWorkStats.longestSession = minutesCompleted;
+      }
+      
+      // Calculate average session length
+      updatedDeepWorkStats.avgSessionLength = 
+        Math.round(updatedDeepWorkStats.totalMinutes / updatedDeepWorkStats.totalSessions);
+      
+      // Update achievements
+      updatedDeepWorkStats.achievements = updatedDeepWorkStats.achievements.map(achievement => {
+        const updated = { ...achievement };
+        
+        switch (achievement.id) {
+          case 'first-deep':
+            updated.progress = updatedDeepWorkStats.totalSessions;
+            updated.completed = updated.progress >= updated.goal;
+            break;
+          case 'deep-streak':
+            updated.progress = updatedDeepWorkStats.currentStreak;
+            updated.completed = updated.progress >= updated.goal;
+            break;
+          case 'deep-hour':
+            updated.progress = updatedDeepWorkStats.totalMinutes;
+            updated.completed = updated.progress >= updated.goal;
+            break;
+          case 'deep-master':
+            updated.progress = updatedDeepWorkStats.longestSession;
+            updated.completed = updated.progress >= updated.goal;
+            break;
+        }
+        
+        if (updated.completed && !achievement.completed) {
+          updated.completedTimestamp = new Date().toISOString();
+          // Show notification for newly achieved item
+          toast.success(`Achievement Unlocked: ${updated.name}`, {
+            description: updated.description
+          });
+        }
+        
+        return updated;
+      });
+      
+      setDeepWorkStats(updatedDeepWorkStats);
+      
+      // Also update general stats
+      const updatedStats: ExtendedGoogleBlockStats = {
+        ...stats,
+        searchesBlocked: stats.searchesBlocked + 1,
+        timesSaved: stats.timesSaved + Math.floor(minutesCompleted / 2),
+        productivityGain: stats.productivityGain + 1
+      };
+      
+      setStats(updatedStats);
+    }
+    
+    toast.success(completed ? 'Deep Work session completed!' : 'Deep Work session ended early.');
+  };
+  
+  // Get flow state color
+  const getFlowStateColor = () => {
+    if (deepWorkFlowState >= 80) return 'text-green-500';
+    if (deepWorkFlowState >= 60) return 'text-green-400';
+    if (deepWorkFlowState >= 40) return 'text-yellow-400';
+    if (deepWorkFlowState >= 20) return 'text-orange-400';
+    return 'text-gray-400';
+  };
+  
+  // Get flow state label
+  const getFlowStateLabel = () => {
+    if (deepWorkFlowState >= 80) return 'Deep Flow';
+    if (deepWorkFlowState >= 60) return 'In the Zone';
+    if (deepWorkFlowState >= 40) return 'Focused';
+    if (deepWorkFlowState >= 20) return 'Getting Started';
+    return 'Warming Up';
+  };
+  
+  // Toggle domain blocking
+  const toggleDomainBlocking = (domainToRemove: string) => {
+    // Create a local copy of the current domains array
+    const currentDomains = settings.customBlockedDomains || [];
+    
+    // Filter out the domain to remove
+    const updatedDomains = Array.isArray(currentDomains) 
+      ? currentDomains.filter(domain => domain !== domainToRemove)
+      : [];
+    
+    // Create an updated settings object with the filtered domains
+    const updatedSettings: GoogleBlockSettings = {
+      ...settings,
+      customBlockedDomains: updatedDomains
+    };
+    
+    setSettings(updatedSettings);
+    saveSettings(updatedSettings);
+    
+    toast.success('Domain removed from block list');
+  };
+  
+  // Add new domain to block
+  const addBlockedDomain = () => {
+    const domain = prompt('Enter a domain to block (e.g. facebook.com):');
+    if (domain) {
+      // Create a local copy of the current domains array
+      const currentDomains = settings.customBlockedDomains || [];
+      
+      // Create an updated settings object with the new domain
+      const updatedSettings: GoogleBlockSettings = {
+        ...settings,
+        customBlockedDomains: Array.isArray(currentDomains) ? [...currentDomains, domain] : [domain]
+      };
+      
+      setSettings(updatedSettings);
+      saveSettings(updatedSettings);
+      
+      toast.success('Domain added to block list');
+    }
+  };
+  
+  // Set block intensity
+  const setBlockIntensity = (value: number[]) => {
+    const intensity = value[0];
+    const updatedSettings: GoogleBlockSettings = {
+      ...settings,
+      intensityLevel: intensity
+    };
+    setSettings(updatedSettings);
+    saveSettings(updatedSettings);
+  };
+  
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (deepWorkInterval) {
+        clearInterval(deepWorkInterval);
+      }
+    };
+  }, []);
+  
+  // Add smart pattern analysis function
+  const analyzePatterns = () => {
+    // Get the current search patterns
+    const distractionPatterns = searchPatterns.filter(p => 
+      p.category === 'distraction' || p.category === 'social'
+    );
+    
+    if (distractionPatterns.length === 0) return;
+    
+    // Find common patterns in distractions
+    const commonWords = extractCommonWords(distractionPatterns.map(p => p.pattern));
+    const timeWasters = distractionPatterns.sort((a, b) => b.timeWasted - a.timeWasted).slice(0, 3);
+    
+    // Update pattern analysis with smart recommendations
+    const updatedAnalysis: PatternAnalysis = {
+      ...patternAnalysis,
+      distractionTriggers: commonWords.slice(0, 4),
+      recommendedBlockTimes: generateOptimalBlockTimes(distractionPatterns)
+    };
+    
+    setPatternAnalysis(updatedAnalysis);
+    
+    // Show recommendations to the user
+    toast.success("Pattern analysis complete", {
+      description: "New recommendations have been generated based on your search patterns."
+    });
+  };
+
+  // Extract common words from a list of patterns
+  const extractCommonWords = (patterns: string[]): string[] => {
+    // Skip common words
+    const stopWords = new Set(['and', 'the', 'to', 'a', 'an', 'in', 'on', 'for', 'of', 'with', 'how', 'what', 'why', 'when', 'who', 'where']);
+    
+    // Count word occurrences
+    const wordCounts: Record<string, number> = {};
+    patterns.forEach(pattern => {
+      const words = pattern.toLowerCase().split(/\s+/);
+      words.forEach(word => {
+        if (word.length > 2 && !stopWords.has(word)) {
+          wordCounts[word] = (wordCounts[word] || 0) + 1;
+        }
+      });
+    });
+    
+    // Convert to array and sort by frequency
+    return Object.entries(wordCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 8)
+      .map(([word]) => word);
+  };
+
+  // Generate optimal block times based on user patterns
+  const generateOptimalBlockTimes = (patterns: SearchPattern[]): string[] => {
+    // Default recommendations if not enough data
+    if (patterns.length < 3) {
+      return [
+        '9:00 AM - 11:00 AM', 
+        '2:00 PM - 4:00 PM', 
+        '8:00 PM - 9:00 PM'
+      ];
+    }
+    
+    // Extract timestamps and find patterns
+    const timestamps = patterns.map(p => new Date(p.timestamp));
+    const hours = timestamps.map(t => t.getHours());
+    
+    // Count occurrences by hour
+    const hourCounts: Record<number, number> = {};
+    hours.forEach(hour => {
+      hourCounts[hour] = (hourCounts[hour] || 0) + 1;
+    });
+    
+    // Find peak distraction hours (top 3)
+    const peakHours = Object.entries(hourCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([hour]) => parseInt(hour));
+    
+    // Return optimal focus times (avoiding peak distraction hours)
+    const allHours = [];
+    for (let i = 8; i <= 21; i++) {
+      allHours.push(i);
+    }
+    const focusHours = allHours.filter(hour => !peakHours.includes(hour));
+    
+    // Create 2-hour blocks for optimal focus
+    const blocks: string[] = [];
+    for (let i = 0; i < focusHours.length - 1; i++) {
+      if (focusHours[i] + 1 === focusHours[i + 1]) {
+        const startHour = focusHours[i];
+        const endHour = startHour + 2 <= 21 ? startHour + 2 : 21; // Cap at 9pm
+        
+        const formattedStart = formatHour(startHour);
+        const formattedEnd = formatHour(endHour);
+        
+        blocks.push(`${formattedStart} - ${formattedEnd}`);
+        i++; // Skip the next hour as we've used it in this block
+      }
+    }
+    
+    // If we couldn't create enough blocks, add some defaults
+    while (blocks.length < 3) {
+      if (!blocks.includes('9:00 AM - 11:00 AM')) {
+        blocks.push('9:00 AM - 11:00 AM');
+      } else if (!blocks.includes('2:00 PM - 4:00 PM')) {
+        blocks.push('2:00 PM - 4:00 PM');
+      } else {
+        blocks.push('7:00 PM - 9:00 PM');
+      }
+    }
+    
+    return blocks.slice(0, 3);
+  };
+
+  // Helper to format hours
+  const formatHour = (hour: number): string => {
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const hour12 = hour % 12 || 12;
+    return `${hour12}:00 ${ampm}`;
+  };
+
+  // Add a button to run smart analysis
+  const SmartAnalysisButton = () => (
+    <Card className="mt-4">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-lg">Smart Pattern Analysis</CardTitle>
+        <CardDescription>
+          Get personalized recommendations based on your search patterns
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <p className="text-sm text-muted-foreground mb-4">
+          Our AI will analyze your browsing patterns to identify distractions and suggest optimal focus times.
+        </p>
+        <Button 
+          onClick={analyzePatterns} 
+          disabled={searchPatterns.length < 3}
+          className="w-full"
+        >
+          <Activity className="h-4 w-4 mr-2" />
+          Run Smart Analysis
+        </Button>
+      </CardContent>
+    </Card>
+  );
+
+  // Add new component for adaptive learning tab
+  const AdaptiveLearningSection = () => {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="text-2xl font-bold">Adaptive Distraction Blocking</h2>
+            <p className="text-muted-foreground">
+              Our AI learns your distraction patterns and helps you stay focused
+            </p>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <Switch 
+              checked={adaptiveLearningEnabled} 
+              onCheckedChange={toggleAdaptiveLearning} 
+              id="adaptive-learning"
+            />
+            <Label htmlFor="adaptive-learning">
+              {adaptiveLearningEnabled ? 'Enabled' : 'Disabled'}
+            </Label>
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Distraction metrics card */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>Distraction Metrics</CardTitle>
+                <CardDescription>Your distraction patterns and statistics</CardDescription>
+              </div>
+              <Select
+                value={metricsTimeRange}
+                onValueChange={(value) => {
+                  setMetricsTimeRange(value);
+                  loadDistractionMetrics();
+                }}
+              >
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue placeholder="Select range" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="7d">Last 7 days</SelectItem>
+                  <SelectItem value="30d">Last 30 days</SelectItem>
+                  <SelectItem value="90d">Last 90 days</SelectItem>
+                  <SelectItem value="1y">Last year</SelectItem>
+                </SelectContent>
+              </Select>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {metricsLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <svg className="animate-spin h-8 w-8 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                </div>
+              ) : (
+                <>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-4 rounded-lg bg-muted/50">
+                      <div className="text-3xl font-bold">
+                        {distractionMetrics?.total_blocked || 0}
+                      </div>
+                      <div className="text-sm text-muted-foreground">Distractions Blocked</div>
+                    </div>
+                    <div className="p-4 rounded-lg bg-muted/50">
+                      <div className="text-3xl font-bold">
+                        {distractionMetrics?.focus_time_saved 
+                          ? `${Math.round(distractionMetrics.focus_time_saved / 60)}m`
+                          : '0m'
+                        }
+                      </div>
+                      <div className="text-sm text-muted-foreground">Focus Time Saved</div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h3 className="font-medium mb-2">Most Common Distractions</h3>
+                    {distractionMetrics?.most_frequent_patterns && 
+                    distractionMetrics.most_frequent_patterns.length > 0 ? (
+                      <div className="space-y-2">
+                        {distractionMetrics.most_frequent_patterns.slice(0, 5).map((pattern, index) => (
+                          <div key={index} className="space-y-1">
+                            <div className="flex justify-between text-sm">
+                              <span>{pattern.pattern}</span>
+                              <span className="text-muted-foreground">{pattern.count}x</span>
+                            </div>
+                            <Progress 
+                              value={
+                                (pattern.count / distractionMetrics.most_frequent_patterns[0].count) * 100
+                              } 
+                              className="h-2"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-muted-foreground">No distraction data yet</p>
+                    )}
+                  </div>
+                  
+                  <div>
+                    <h3 className="font-medium mb-2">Productivity Trend</h3>
+                    {distractionMetrics?.improvement_trend && 
+                    distractionMetrics.improvement_trend.length > 0 ? (
+                      <div className="h-24">
+                        <div className="flex items-end w-full h-full space-x-1">
+                          {distractionMetrics.improvement_trend.slice(-10).map((item, index) => (
+                            <div 
+                              key={index} 
+                              className="flex-1"
+                              title={`${item.date}: ${item.blocked_ratio}% blocked`}
+                            >
+                              <div 
+                                className="bg-primary/80 rounded-t" 
+                                style={{ 
+                                  height: `${Math.max(8, item.blocked_ratio)}%`,
+                                  transition: 'height 0.3s ease' 
+                                }}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-sm text-muted-foreground">No trend data yet</p>
+                    )}
+                  </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
+          
+          {/* AI Insights card */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>AI Insights</CardTitle>
+                <CardDescription>Personalized distraction reduction strategies</CardDescription>
+              </div>
+              <Button 
+                size="sm" 
+                variant="outline" 
+                onClick={generateNewInsights}
+                disabled={insightsLoading}
+              >
+                {insightsLoading ? (
+                  <><RefreshCcw className="h-4 w-4 mr-2 animate-spin" /> Generating...</>
+                ) : (
+                  <><BrainCircuit className="h-4 w-4 mr-2" /> Generate</>
+                )}
+              </Button>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {distractionInsights.length > 0 ? (
+                distractionInsights.map((insight) => (
+                  <div 
+                    key={insight.id} 
+                    className={`p-3 rounded-lg border ${
+                      insight.is_applied ? 'bg-muted/40 border-muted' : 'bg-primary/5 border-primary/10'
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="shrink-0 mt-1">
+                        {insight.is_applied ? (
+                          <CheckCircle className="h-5 w-5 text-green-500" />
+                        ) : (
+                          <LightbulbIcon className="h-5 w-5 text-amber-500" />
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm">{insight.description}</p>
+                        <div className="flex items-center mt-2 gap-2">
+                          <Badge variant="outline" className="text-xs font-normal">
+                            {insight.insight_type}
+                          </Badge>
+                          <Badge variant="outline" className="text-xs font-normal">
+                            {Math.round(insight.confidence_level * 100)}% confidence
+                          </Badge>
+                          {!insight.is_applied && (
+                            <Button 
+                              size="sm" 
+                              variant="secondary"
+                              className="ml-auto"
+                              onClick={() => applyInsight(insight.id)}
+                            >
+                              Apply
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="flex flex-col items-center justify-center py-8 text-center">
+                  <BrainCircuit className="h-12 w-12 text-muted-foreground mb-3" />
+                  <p className="text-muted-foreground">No insights generated yet</p>
+                  <p className="text-sm text-muted-foreground">
+                    Click the 'Generate' button to analyze your distraction patterns
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+        
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-medium">Distraction Patterns</h3>
+            <Button 
+              size="sm" 
+              variant="outline" 
+              onClick={() => document.getElementById('add-pattern-form')?.classList.toggle('hidden')}
+            >
+              <Plus className="h-4 w-4 mr-2" /> Add Pattern
+            </Button>
+          </div>
+          
+          {/* Form to add new distraction pattern */}
+          <Card id="add-pattern-form" className="hidden">
+            <CardHeader>
+              <CardTitle>Add Distraction Pattern</CardTitle>
+              <CardDescription>
+                Manually add a distraction source to track and potentially block
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="pattern-type">Pattern Type</Label>
+                    <Select
+                      value={newDistractionPattern.pattern_type}
+                      onValueChange={(value: DistractionPattern['pattern_type']) => 
+                        setNewDistractionPattern({...newDistractionPattern, pattern_type: value})
+                      }
+                    >
+                      <SelectTrigger id="pattern-type">
+                        <SelectValue placeholder="Select pattern type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="website">Website</SelectItem>
+                        <SelectItem value="app">Application</SelectItem>
+                        <SelectItem value="search">Search Term</SelectItem>
+                        <SelectItem value="notification">Notification</SelectItem>
+                        <SelectItem value="activity">Activity</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="pattern-value">Pattern Value</Label>
+                    <Input 
+                      id="pattern-value"
+                      placeholder={`Enter ${newDistractionPattern.pattern_type} name`}
+                      value={newDistractionPattern.pattern_value}
+                      onChange={(e) => 
+                        setNewDistractionPattern({...newDistractionPattern, pattern_value: e.target.value})
+                      }
+                    />
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="impact-level">Impact Level</Label>
+                  <div className="flex items-center gap-4">
+                    <span className="text-sm">Low</span>
+                    <Slider
+                      id="impact-level"
+                      min={1}
+                      max={10}
+                      step={1}
+                      value={[newDistractionPattern.impact_level]}
+                      onValueChange={([value]) => 
+                        setNewDistractionPattern({...newDistractionPattern, impact_level: value})
+                      }
+                    />
+                    <span className="text-sm">High</span>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+            <CardFooter className="flex justify-end gap-2">
+              <Button 
+                variant="ghost" 
+                onClick={() => document.getElementById('add-pattern-form')?.classList.add('hidden')}
+              >
+                Cancel
+              </Button>
+              <Button onClick={addDistractionPattern}>Add Pattern</Button>
+            </CardFooter>
+          </Card>
+          
+          {/* Distraction patterns list */}
+          <div className="border rounded-lg overflow-hidden">
+            <div className="bg-muted/50 px-4 py-2 flex items-center text-sm font-medium">
+              <div className="w-1/4">Pattern</div>
+              <div className="w-1/6">Type</div>
+              <div className="w-1/6">Impact</div>
+              <div className="w-1/6">Frequency</div>
+              <div className="w-1/4 text-right">Actions</div>
+            </div>
+            <div className="divide-y">
+              {distractionPatterns.length > 0 ? (
+                distractionPatterns.map((pattern) => (
+                  <div 
+                    key={pattern.id} 
+                    className="px-4 py-3 flex items-center text-sm"
+                  >
+                    <div className="w-1/4 font-medium truncate" title={pattern.pattern_value}>
+                      {pattern.pattern_value}
+                    </div>
+                    <div className="w-1/6">
+                      <Badge variant="outline" className="capitalize">
+                        {pattern.pattern_type}
+                      </Badge>
+                    </div>
+                    <div className="w-1/6">
+                      <div className="flex items-center gap-1">
+                        <Progress value={(pattern.impact_level / 10) * 100} className="h-2 w-16" />
+                        <span className="text-xs">{pattern.impact_level}/10</span>
+                      </div>
+                    </div>
+                    <div className="w-1/6">
+                      {pattern.frequency}x
+                    </div>
+                    <div className="w-1/4 flex justify-end space-x-2">
+                      <Button
+                        variant={pattern.is_blocked ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => toggleBlockPattern(pattern.id, pattern.is_blocked)}
+                      >
+                        {pattern.is_blocked ? (
+                          <><Eye className="h-4 w-4 mr-1" /> Unblock</>
+                        ) : (
+                          <><EyeOff className="h-4 w-4 mr-1" /> Block</>
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="px-4 py-8 text-center text-muted-foreground">
+                  <p>No distraction patterns added yet</p>
+                  <p className="text-sm mt-1">
+                    Add patterns manually or let the system learn them
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Add function to implement wellness recommendation
+  const implementRecommendation = (rec: WellnessRecommendation) => {
+    toast.success(`Implementing: ${rec.title}`, {
+      description: 'This recommendation has been added to your wellness plan.',
+      action: {
+        label: 'View Plan',
+        onClick: () => setActiveTab('digitalWellness')
+      }
+    });
+    
+    // In a real implementation, this would update a user's wellness plan in the database
+    // For now, we just update the wellness score as a simulation
+    setWellnessScore(prev => ({
+      ...prev,
+      overall: Math.min(100, prev.overall + Math.floor(rec.impact / 3))
+    }));
+  };
+  
+  const startDigitalDetox = (durationHours: number) => {
+    // Calculate end time
+    const endTime = new Date();
+    endTime.setHours(endTime.getHours() + durationHours);
+    
+    // Update detox state
+    setDetoxProgress(prev => ({
+      ...prev,
+      currentStreak: prev.currentStreak + 1,
+      longestStreak: Math.max(prev.longestStreak, prev.currentStreak + 1),
+      totalCompletedDetoxes: prev.totalCompletedDetoxes + 1,
+      currentDetoxEnd: endTime.toISOString()
+    }));
+    
+    // Update settings to max blocking during detox
+    setSettings(prev => ({
+      ...prev,
+      enabled: true,
+      blockLevel: 'aggressive',
+      intensityLevel: 10,
+      notificationBlocking: true,
+      blockSocialMedia: true
+    }));
+    
+    toast.success(`Digital Detox Started`, {
+      description: `Your ${durationHours}-hour digital detox will end at ${endTime.toLocaleTimeString()}`,
+    });
+  };
+  
+  const retainPredictiveModel = async () => {
+    setPredictiveModel(prev => ({ ...prev, trainingStatus: 'in_progress' }));
+    
+    // Simulate ML training
+    setTimeout(() => {
+      setPredictiveModel(prev => ({
+        ...prev,
+        trainingStatus: 'complete',
+        accuracy: Math.min(99, prev.accuracy + Math.random() * 5),
+        lastUpdated: new Date().toISOString()
+      }));
+      
+      toast.success('Predictive model updated', {
+        description: 'Your personalized distraction predictions have been improved based on your recent activity patterns.',
+      });
+    }, 3000);
+  };
+  
+  const DigitalWellnessTab = () => (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Heart className="mr-2 h-5 w-5 text-rose-500" />
+              Digital Wellness Score
+            </CardTitle>
+            <CardDescription>Your progress toward a balanced digital life</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="mb-4">
+              <div className="flex justify-between mb-1">
+                <span className="text-sm">Overall Score</span>
+                <span className="text-sm font-medium">{wellnessScore.overall}%</span>
+              </div>
+              <Progress value={wellnessScore.overall} className="h-2" />
+            </div>
+            
+            <div className="grid grid-cols-3 gap-2 mb-4">
+              <div className="space-y-1">
+                <div className="flex justify-between">
+                  <span className="text-xs">Balance</span>
+                  <span className="text-xs">{wellnessScore.balance}%</span>
+                </div>
+                <Progress value={wellnessScore.balance} className="h-1" />
+              </div>
+              <div className="space-y-1">
+                <div className="flex justify-between">
+                  <span className="text-xs">Mindfulness</span>
+                  <span className="text-xs">{wellnessScore.mindfulness}%</span>
+                </div>
+                <Progress value={wellnessScore.mindfulness} className="h-1" />
+              </div>
+              <div className="space-y-1">
+                <div className="flex justify-between">
+                  <span className="text-xs">Habits</span>
+                  <span className="text-xs">{wellnessScore.healthyHabits}%</span>
+                </div>
+                <Progress value={wellnessScore.healthyHabits} className="h-1" />
+              </div>
+            </div>
+            
+            <div className="pt-2">
+              <h4 className="text-sm font-medium mb-2">Weekly Trend</h4>
+              <div className="flex items-end justify-between h-16">
+                {wellnessScore.weeklyTrend.map((score, i) => (
+                  <div 
+                    key={i} 
+                    className="w-1/8 bg-primary rounded-t"
+                    style={{ 
+                      height: `${score}%`, 
+                      opacity: 0.6 + ((i / wellnessScore.weeklyTrend.length) * 0.4)
+                    }}
+                  ></div>
+                ))}
+              </div>
+              <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                <span>Mon</span>
+                <span>Tue</span>
+                <span>Wed</span>
+                <span>Thu</span>
+                <span>Fri</span>
+                <span>Sat</span>
+                <span>Today</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Cpu className="mr-2 h-5 w-5 text-indigo-500" />
+              Predictive Distraction Prevention
+            </CardTitle>
+            <CardDescription>AI-powered insights to help you stay focused</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="mb-4">
+              <div className="flex justify-between items-center mb-3">
+                <div>
+                  <h4 className="text-sm font-medium">Model Status</h4>
+                  <div className="text-sm text-muted-foreground">
+                    {predictiveModel.trainingStatus === 'complete' ? 
+                      'Active and learning from your patterns' : 
+                      'Training in progress...'}
+                  </div>
+                </div>
+                <Badge variant={predictiveModel.trainingStatus === 'complete' ? 'outline' : 'secondary'}>
+                  {predictiveModel.trainingStatus === 'complete' ? 
+                    `${predictiveModel.accuracy}% accurate` : 
+                    'Training...'}
+                </Badge>
+              </div>
+              
+              {predictiveModel.nextPredictedDistraction && (
+                <div className="p-3 bg-muted rounded-lg mb-3">
+                  <h4 className="text-sm font-medium mb-1">Next Predicted Distraction</h4>
+                  <div className="flex justify-between text-sm">
+                    <span>{predictiveModel.nextPredictedDistraction.type}</span>
+                    <span className="font-medium">{predictiveModel.nextPredictedDistraction.time}</span>
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    {predictiveModel.nextPredictedDistraction.confidence}% confidence
+                  </div>
+                </div>
+              )}
+              
+              <div>
+                <h4 className="text-sm font-medium mb-1">Recommended Actions</h4>
+                <ul className="text-sm space-y-1">
+                  {predictiveModel.preventiveActions.map((action, i) => (
+                    <li key={i} className="flex items-start">
+                      <CheckCircle className="h-4 w-4 mr-2 text-green-500 shrink-0 mt-0.5" />
+                      <span>{action}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+            
+            <Button 
+              onClick={retainPredictiveModel} 
+              variant="outline" 
+              size="sm" 
+              className="w-full"
+              disabled={predictiveModel.trainingStatus === 'in_progress'}
+            >
+              {predictiveModel.trainingStatus === 'in_progress' ? 
+                <RotateCw className="mr-2 h-3 w-3 animate-spin" /> : 
+                <BrainCircuit className="mr-2 h-3 w-3" />}
+              Update Prediction Model
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+      
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <Leaf className="mr-2 h-5 w-5 text-green-500" />
+            Digital Detox
+          </CardTitle>
+          <CardDescription>Take structured breaks from technology</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <h4 className="text-sm font-medium mb-2">Your Stats</h4>
+              <div className="grid grid-cols-3 gap-2">
+                <div className="bg-muted p-2 rounded-lg text-center">
+                  <div className="text-2xl font-bold">{detoxProgress.currentStreak}</div>
+                  <div className="text-xs text-muted-foreground">Current Streak</div>
+                </div>
+                <div className="bg-muted p-2 rounded-lg text-center">
+                  <div className="text-2xl font-bold">{detoxProgress.longestStreak}</div>
+                  <div className="text-xs text-muted-foreground">Longest Streak</div>
+                </div>
+                <div className="bg-muted p-2 rounded-lg text-center">
+                  <div className="text-2xl font-bold">{detoxProgress.totalCompletedDetoxes}</div>
+                  <div className="text-xs text-muted-foreground">Total Detoxes</div>
+                </div>
+              </div>
+              
+              {detoxProgress.currentDetoxEnd && new Date(detoxProgress.currentDetoxEnd) > new Date() && (
+                <div className="mt-4 p-3 bg-green-50 dark:bg-green-950 rounded-lg border border-green-200 dark:border-green-800">
+                  <h4 className="text-sm font-medium text-green-700 dark:text-green-300 mb-1">
+                    Active Detox in Progress
+                  </h4>
+                  <div className="text-sm">
+                    Ends at {new Date(detoxProgress.currentDetoxEnd).toLocaleTimeString()}
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            <div>
+              <h4 className="text-sm font-medium mb-2">Start a Digital Detox</h4>
+              <div className="grid grid-cols-3 gap-2">
+                <Button onClick={() => startDigitalDetox(1)} variant="outline" size="sm">
+                  1 hour
+                </Button>
+                <Button onClick={() => startDigitalDetox(3)} variant="outline" size="sm">
+                  3 hours
+                </Button>
+                <Button onClick={() => startDigitalDetox(8)} variant="outline" size="sm">
+                  8 hours
+                </Button>
+              </div>
+              <div className="mt-2">
+                <Button onClick={() => startDigitalDetox(24)} variant="default" size="sm" className="w-full">
+                  <Sunset className="mr-2 h-4 w-4" />
+                  24-Hour Digital Sabbath
+                </Button>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+      
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <LightbulbIcon className="mr-2 h-5 w-5 text-yellow-500" />
+            Personalized Recommendations
+          </CardTitle>
+          <CardDescription>Tailored suggestions to improve your digital wellness</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {recommendations.map(rec => (
+              <div key={rec.id} className="p-3 bg-muted rounded-lg flex justify-between items-center">
+                <div>
+                  <h4 className="text-sm font-medium mb-1">{rec.title}</h4>
+                  <p className="text-sm text-muted-foreground">{rec.description}</p>
+                  <div className="flex items-center mt-2 space-x-3">
+                    <Badge variant="outline" className="text-xs">
+                      {rec.category}
+                    </Badge>
+                    <span className="text-xs text-muted-foreground">
+                      {rec.estimatedTimeMin} min
+                    </span>
+                    <div className="flex items-center">
+                      {Array.from({ length: Math.floor(rec.impact / 2) }).map((_, i) => (
+                        <ThumbsUp key={i} className="h-3 w-3 text-primary" />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                <Button size="sm" onClick={() => implementRecommendation(rec)}>
+                  Apply
+                </Button>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+  
+  // Add a type for site blocking
+  interface BlockedSite {
+    id: string;
+    domain: string;
+    category: 'social' | 'news' | 'entertainment' | 'shopping' | 'productivity' | 'custom';
+    isActive: boolean;
+    blockSchedule?: {
+      startTime: string;
+      endTime: string;
+      days: string[];
+    };
+    created_at?: string;
+  }
+  
+  // Add state for website blocking
+  const [blockedSites, setBlockedSites] = useState<BlockedSite[]>([
+    {
+      id: '1',
+      domain: 'facebook.com',
+      category: 'social',
+      isActive: true
+    },
+    {
+      id: '2',
+      domain: 'twitter.com',
+      category: 'social',
+      isActive: true
+    },
+    {
+      id: '3',
+      domain: 'youtube.com',
+      category: 'entertainment',
+      isActive: true
+    },
+    {
+      id: '4',
+      domain: 'reddit.com',
+      category: 'social',
+      isActive: true
+    }
+  ]);
+  
+  const [newBlockedSite, setNewBlockedSite] = useState('');
+  const [newSiteCategory, setNewSiteCategory] = useState<BlockedSite['category']>('custom');
+  const [blockScheduleActive, setBlockScheduleActive] = useState(false);
+  const [blockSchedule, setBlockSchedule] = useState({
+    startTime: '09:00',
+    endTime: '17:00',
+    days: ['mon', 'tue', 'wed', 'thu', 'fri']
+  });
+  
+  // Add website blocker function
+  const addBlockedSite = () => {
+    if (!newBlockedSite.trim()) {
+      toast.error('Please enter a domain to block');
+      return;
+    }
+    
+    // Simple validation for domain format
+    const domainRegex = /^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/;
+    const domain = newBlockedSite.toLowerCase().trim();
+    
+    if (!domainRegex.test(domain)) {
+      toast.error('Please enter a valid domain (e.g. facebook.com)');
+      return;
+    }
+    
+    // Check if already exists
+    if (blockedSites.some(site => site.domain === domain)) {
+      toast.error('This domain is already blocked');
+      return;
+    }
+    
+    const newSite: BlockedSite = {
+      id: Date.now().toString(),
+      domain,
+      category: newSiteCategory,
+      isActive: true,
+      blockSchedule: blockScheduleActive ? blockSchedule : undefined
+    };
+    
+    setBlockedSites([...blockedSites, newSite]);
+    setNewBlockedSite('');
+    toast.success(`${domain} has been added to your block list`);
+    
+    // Update settings to reflect site blocking
+    saveSettings({
+      ...settings,
+      blockSocialMedia: true,
+      customBlockedDomains: [...(settings.customBlockedDomains || []), domain]
+    });
+  };
+  
+  const toggleBlockedSite = (id: string) => {
+    const updatedSites = blockedSites.map(site => 
+      site.id === id ? { ...site, isActive: !site.isActive } : site
+    );
+    setBlockedSites(updatedSites);
+    
+    // Update settings with new blocked domains list
+    const activeDomains = updatedSites
+      .filter(site => site.isActive)
+      .map(site => site.domain);
+      
+    saveSettings({
+      ...settings,
+      customBlockedDomains: activeDomains
+    });
+  };
+  
+  const removeBlockedSite = (id: string) => {
+    const siteToRemove = blockedSites.find(site => site.id === id);
+    if (!siteToRemove) return;
+    
+    const updatedSites = blockedSites.filter(site => site.id !== id);
+    setBlockedSites(updatedSites);
+    
+    // Update settings
+    const activeDomains = updatedSites
+      .filter(site => site.isActive)
+      .map(site => site.domain);
+      
+    saveSettings({
+      ...settings,
+      customBlockedDomains: activeDomains
+    });
+    
+    toast.success(`${siteToRemove.domain} has been removed from your block list`);
+  };
+  
+  // Add website blocker UI component that can be added in TabsContent for site blocking
+  const WebsiteBlocker = () => (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <Globe className="h-5 w-5 mr-2 text-primary" />
+            Website Blocker
+          </CardTitle>
+          <CardDescription>
+            Block distracting websites to maintain your focus and productivity
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label>Add website to block</Label>
+            <div className="flex gap-2">
+              <Input 
+                placeholder="e.g. facebook.com" 
+                value={newBlockedSite}
+                onChange={(e) => setNewBlockedSite(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && addBlockedSite()}
+              />
+              <Select 
+                value={newSiteCategory}
+                onValueChange={(value) => setNewSiteCategory(value as BlockedSite['category'])}
+              >
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="social">Social Media</SelectItem>
+                  <SelectItem value="news">News</SelectItem>
+                  <SelectItem value="entertainment">Entertainment</SelectItem>
+                  <SelectItem value="shopping">Shopping</SelectItem>
+                  <SelectItem value="productivity">Productivity</SelectItem>
+                  <SelectItem value="custom">Custom</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button onClick={addBlockedSite}>Add</Button>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <Switch
+              id="block-schedule"
+              checked={blockScheduleActive}
+              onCheckedChange={setBlockScheduleActive}
+            />
+            <Label htmlFor="block-schedule">Set block schedule</Label>
+          </div>
+          
+          {blockScheduleActive && (
+            <div className="grid grid-cols-2 gap-4 p-4 border rounded-md bg-muted/20">
+              <div className="space-y-2">
+                <Label>Start time</Label>
+                <Input 
+                  type="time" 
+                  value={blockSchedule.startTime}
+                  onChange={(e) => setBlockSchedule({...blockSchedule, startTime: e.target.value})}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>End time</Label>
+                <Input 
+                  type="time" 
+                  value={blockSchedule.endTime}
+                  onChange={(e) => setBlockSchedule({...blockSchedule, endTime: e.target.value})}
+                />
+              </div>
+              <div className="col-span-2 space-y-2">
+                <Label>Active days</Label>
+                <div className="flex flex-wrap gap-2">
+                  {['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'].map((day) => (
+                    <Badge 
+                      key={day}
+                      variant={blockSchedule.days.includes(day) ? 'default' : 'outline'}
+                      className="cursor-pointer"
+                      onClick={() => {
+                        if (blockSchedule.days.includes(day)) {
+                          setBlockSchedule({
+                            ...blockSchedule, 
+                            days: blockSchedule.days.filter(d => d !== day)
+                          });
+                        } else {
+                          setBlockSchedule({
+                            ...blockSchedule,
+                            days: [...blockSchedule.days, day]
+                          });
+                        }
+                      }}
+                    >
+                      {day.charAt(0).toUpperCase() + day.slice(1)}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+      
+      <Card>
+        <CardHeader>
+          <CardTitle>Blocked Websites</CardTitle>
+          <CardDescription>
+            Manage your list of blocked websites
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {blockedSites.length === 0 ? (
+            <div className="text-center py-6 text-muted-foreground">
+              <Globe className="h-12 w-12 mx-auto mb-2 opacity-20" />
+              <p>No blocked websites yet</p>
+              <p className="text-sm">Add websites above to start blocking distractions</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {blockedSites.map((site) => (
+                <div 
+                  key={site.id} 
+                  className="flex items-center justify-between p-3 rounded-md border bg-card"
+                >
+                  <div className="flex items-center gap-2">
+                    <Switch 
+                      checked={site.isActive} 
+                      onCheckedChange={() => toggleBlockedSite(site.id)}
+                      size="sm"
+                    />
+                    <span className={site.isActive ? 'font-medium' : 'text-muted-foreground line-through'}>
+                      {site.domain}
+                    </span>
+                    <Badge variant="outline" className="text-xs">
+                      {site.category}
+                    </Badge>
+                    {site.blockSchedule && (
+                      <Badge variant="outline" className="text-xs">
+                        Scheduled
+                      </Badge>
+                    )}
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => removeBlockedSite(site.id)}
+                  >
+                    <Trash className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+        <CardFooter>
+          <p className="text-sm text-muted-foreground">
+            Blocking works by redirecting requests to these domains when the feature is enabled
+          </p>
+        </CardFooter>
+      </Card>
+    </div>
+  );
+  
+  return (
+    <div className="container mx-auto p-4 max-w-6xl">
+      <div className="space-y-4">
+        <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
+          <div>
+            <h1 className="text-2xl font-bold">AntiGooglitis</h1>
+            <p className="text-muted-foreground">
+              Break free from mindless Google searching and distraction loops
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            {deepWorkActive ? (
+              <Button onClick={() => endDeepWork(false)} variant="destructive" className="flex items-center">
+                <AlertTriangle className="mr-2 h-4 w-4" />
+                <span>End Deep Work ({formatTimeRemaining(deepWorkTimeRemaining)})</span>
+              </Button>
+            ) : (
+              <Button onClick={startDeepWork} disabled={!settings.enabled} className="flex items-center">
+                <Focus className="mr-2 h-4 w-4" />
+                <span>Start Deep Work Mode</span>
+              </Button>
+            )}
+            <div className="flex items-center gap-2">
+              <Switch
+                checked={settings.enabled}
+                onCheckedChange={toggleBlock}
+                id="block-toggle"
+              />
+              <Label htmlFor="block-toggle" className="text-sm font-medium cursor-pointer">
+                {settings.enabled ? 'Active' : 'Disabled'}
+              </Label>
+            </div>
+          </div>
+        </div>
+        
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="grid grid-cols-2 md:grid-cols-5 w-full">
+            <TabsTrigger value="dashboard" className="flex items-center">
+              <BarChart className="h-4 w-4 mr-2" />
+              <span className="hidden md:inline">Dashboard</span>
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="flex items-center">
+              <Settings className="h-4 w-4 mr-2" />
+              <span className="hidden md:inline">Settings</span>
+            </TabsTrigger>
+            <TabsTrigger value="deepWork" className="flex items-center">
+              <BrainCircuit className="h-4 w-4 mr-2" />
+              <span className="hidden md:inline">Deep Work</span>
+            </TabsTrigger>
+            <TabsTrigger value="patterns" className="flex items-center">
+              <Activity className="h-4 w-4 mr-2" />
+              <span className="hidden md:inline">Patterns</span>
+            </TabsTrigger>
+            <TabsTrigger value="digitalWellness" className="flex items-center">
+              <Heart className="h-4 w-4 mr-2" />
+              <span className="hidden md:inline">Digital Wellness</span>
+            </TabsTrigger>
+            <TabsTrigger value="website-blocker" className="flex items-center">
+              <Globe className="mr-2 h-4 w-4" />
+              Website Blocker
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="dashboard">
+            {loading ? (
+              <div className="py-8 flex flex-col items-center justify-center">
+                <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                <p className="mt-4 text-muted-foreground">Loading your Anti-Googlitis data...</p>
+              </div>
+            ) : (
+              <>
+                <Card className={`overflow-hidden ${deepWorkActive ? 'border-purple-500 bg-purple-50 dark:bg-purple-950/20' : ''}`}>
+                  <CardHeader className={`pb-2 ${deepWorkActive ? 'border-b border-purple-200 dark:border-purple-800' : ''}`}>
+                    <CardTitle className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Focus className={`h-5 w-5 ${deepWorkActive ? 'text-purple-500' : 'text-muted-foreground'}`} />
+                        Deep Work Mode
+                      </div>
+                      {deepWorkActive && (
+                        <Badge variant="outline" className="bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300 animate-pulse">
+                          Active
+                        </Badge>
+                      )}
+                    </CardTitle>
+                    <CardDescription>
+                      {deepWorkActive
+                        ? "All distractions blocked. Stay focused on your important work."
+                        : "Start a focused work session with maximum distraction blocking."}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="pt-4">
+                    {deepWorkActive ? (
+                      <div className="flex flex-col items-center space-y-4">
+                        <div className="text-4xl font-bold text-purple-600 dark:text-purple-400">
+                          {formatTimeRemaining(deepWorkTimeRemaining)}
+                        </div>
+                        <div className="w-full bg-muted rounded-full h-2.5">
+                          <motion.div
+                            className="bg-purple-600 h-2.5 rounded-full"
+                            initial={{ width: "100%" }}
+                            animate={{ 
+                              width: `${(deepWorkTimeRemaining / ((settings.deepWorkDuration || 90) * 60)) * 100}%` 
+                            }}
+                            transition={{ duration: 1 }}
+                          />
+                        </div>
+                        
+                        {/* Flow state indicator */}
+                        <div className="w-full mt-2">
+                          <div className="flex justify-between items-center mb-1">
+                            <span className="text-sm">Flow State</span>
+                            <span className={`text-sm font-medium ${getFlowStateColor()}`}>
+                              {getFlowStateLabel()}
+                            </span>
+                          </div>
+                          <div className="w-full bg-muted rounded-full h-2.5 overflow-hidden">
+                            <motion.div
+                              className={`h-2.5 rounded-full ${
+                                deepWorkFlowState >= 80 ? 'bg-green-500' :
+                                deepWorkFlowState >= 60 ? 'bg-green-400' :
+                                deepWorkFlowState >= 40 ? 'bg-yellow-400' :
+                                deepWorkFlowState >= 20 ? 'bg-orange-400' : 'bg-gray-400'
+                              }`}
+                              initial={{ width: "0%" }}
+                              animate={{ width: `${deepWorkFlowState}%` }}
+                              transition={{ duration: 1 }}
+                            />
+                          </div>
+                        </div>
+                        
+                        <p className="text-sm text-muted-foreground">
+                          Deep Work session in progress. Distraction blocking at maximum level.
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="description">Description</Label>
+                        <Textarea 
+                          id="description"
+                          placeholder="Short description of this alternative"
+                          value={newAlternative.description}
+                          onChange={(e) => setNewAlternative({...newAlternative, description: e.target.value})}
+                          disabled={alternativeLoading}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="url">URL</Label>
+                        <Input 
+                          id="url"
+                          placeholder="https://example.com" 
+                          value={newAlternative.url}
+                          onChange={(e) => setNewAlternative({...newAlternative, url: e.target.value})}
+                          disabled={alternativeLoading}
+                        />
+                      </div>
+                      <Button onClick={addAlternative} disabled={alternativeLoading}>
+                        {alternativeLoading ? (
+                          <div className="flex items-center">
+                            <div className="animate-spin w-4 h-4 border-2 border-current border-t-transparent rounded-full mr-1"></div>
+                            <span>Adding...</span>
+                          </div>
+                        ) : 'Add Alternative'}
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="digitalWellness">
+            <DigitalWellnessTab />
+          </TabsContent>
+          <TabsContent value="website-blocker" className="mt-4">
+            <WebsiteBlocker />
+          </TabsContent>
+        </Tabs>
+      </div>
+    </div>
+  );
+} 

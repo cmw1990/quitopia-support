@@ -1,0 +1,642 @@
+{
+  "lastUpdated": "2025-05-23",
+  "overallCompletion": 5,
+  "recentEnhancements": [
+    "Initial project setup with basic component structure",
+    "Implemented Supabase REST API client for data access",
+    "Created basic routing and layout structure"
+  ],
+  "pendingImprovements": [
+    "Implement comprehensive ADHD-friendly task management system",
+    "Create advanced Pomodoro timer with customizable work/break cycles",
+    "Develop distraction blocking system with website and app filtering",
+    "Build focus session tracking with detailed analytics",
+    "Implement cognitive load management tools",
+    "Create personalized focus strategies based on user data",
+    "Develop gamification system for maintaining motivation",
+    "Implement mood and energy tracking to optimize focus periods",
+    "Create visualization tools for focus patterns and productivity insights",
+    "Develop integration with calendar systems for time blocking",
+    "Implement notification management system to reduce distractions",
+    "Create accountability features with social reinforcement",
+    "Develop comprehensive settings for personalization"
+  ],
+  "productDescription": {
+    "name": "Easier Focus",
+    "tagline": "The World's Most Comprehensive Focus/Productivity/ADHD Support App",
+    "version": "1.0.0",
+    "lastUpdated": "2025-05-23",
+    "corePhilosophy": "Provide evidence-based, personalized tools to help individuals with focus challenges, ADHD, and productivity needs manage their attention and achieve their goals",
+    "overview": "Easier Focus is a sophisticated micro-frontend within the Well-Charged ecosystem that delivers a comprehensive suite of tools designed specifically for individuals with ADHD, focus challenges, and productivity needs. Built with neurodiversity in mind, it combines cutting-edge focus techniques, personalized strategies, and data-driven insights to help users manage their attention effectively.",
+    "keyDifferentiators": [
+      "Neurodiversity-first design approach optimized for ADHD and focus challenges",
+      "Comprehensive suite of integrated focus tools in one platform",
+      "Personalized focus strategies based on individual cognitive patterns",
+      "Evidence-based techniques backed by neuroscience research",
+      "Adaptive difficulty that adjusts to user's current cognitive state",
+      "Detailed analytics and visualization of focus patterns",
+      "Gamification elements designed specifically for dopamine regulation",
+      "Integration with external productivity systems",
+      "Community support and accountability features"
+    ],
+    "targetAudience": [
+      "Individuals with diagnosed ADHD seeking digital support tools",
+      "Knowledge workers struggling with focus in distraction-rich environments",
+      "Students needing structured study support",
+      "Professionals seeking to optimize productivity and deep work",
+      "Anyone looking to improve their attention management skills"
+    ],
+    "technicalArchitecture": {
+      "framework": "React 18.2.0",
+      "buildTool": "Vite 4.4.x",
+      "routing": "React Router 6.4.0",
+      "moduleFederation": "Module Federation Plugin 1.3.3",
+      "database": "Supabase with direct REST API calls",
+      "authentication": "Supabase Auth with JWT tokens",
+      "apiStrategy": "Direct REST API calls to Supabase without custom backend servers",
+      "deploymentPattern": "Independently deployable micro-frontend",
+      "codebaseLocation": "/easier-focus",
+      "urlStructure": {
+        "app": "/easier-focus/app",
+        "auth": "/easier-focus/auth"
+      },
+      "keyTables": [
+        "focus_sessions: Records of focus sessions with timestamps and metadata",
+        "focus_tasks: Task management for focus sessions",
+        "focus_stats: Aggregated focus statistics by day",
+        "focus_settings: User preferences for focus features",
+        "focus_strategies: Personalized focus techniques and their effectiveness",
+        "focus_distractions: Tracked distractions and interventions",
+        "focus_moods: Mood and energy tracking related to focus",
+        "focus_achievements: Gamification and milestone data"
+      ]
+    },
+    "pages": {
+      "dashboard": {
+        "path": "/easier-focus/app",
+        "purpose": "Central hub showing focus metrics, upcoming tasks, and quick access to key features",
+        "keyComponents": [
+          "Focus metrics overview with visualization",
+          "Quick-start focus session buttons",
+          "Today's priority tasks",
+          "Focus streak and achievement tracking",
+          "Personalized focus recommendations",
+          "Recent focus session history"
+        ]
+      },
+      "taskManager": {
+        "path": "/easier-focus/app/tasks",
+        "purpose": "ADHD-friendly task management system",
+        "keyComponents": [
+          "Visual task board with customizable views",
+          "Task breakdown with microtasks",
+          "Priority matrix with urgency/importance visualization",
+          "Cognitive load estimation for tasks",
+          "Time blocking integration with calendar",
+          "Task templates for recurring activities",
+          "Reward system for task completion"
+        ]
+      },
+      "pomodoroTimer": {
+        "path": "/easier-focus/app/pomodoro",
+        "purpose": "Advanced Pomodoro technique implementation",
+        "keyComponents": [
+          "Customizable work/break intervals",
+          "Visual and audio notifications",
+          "Session history tracking",
+          "Task integration for focused work",
+          "Distraction logging during sessions",
+          "Break activity suggestions",
+          "Adaptive intervals based on focus patterns"
+        ]
+      },
+      "distractionBlocker": {
+        "path": "/easier-focus/app/blocker",
+        "purpose": "Comprehensive distraction management system",
+        "keyComponents": [
+          "Website and app blocking during focus sessions",
+          "Distraction pattern analysis",
+          "Scheduled blocking periods",
+          "Allowlist/blocklist management",
+          "Emergency override with reflection",
+          "Environmental distraction recommendations",
+          "Digital minimalism tools"
+        ]
+      },
+      "focusSessions": {
+        "path": "/easier-focus/app/sessions",
+        "purpose": "Structured focus session planning and tracking",
+        "keyComponents": [
+          "Multiple focus technique options (Pomodoro, deep work, etc.)",
+          "Session scheduling with reminders",
+          "Pre-session preparation checklists",
+          "Post-session reflection prompts",
+          "Session analytics and insights",
+          "Focus environment recommendations",
+          "Session templates for different work types"
+        ]
+      },
+      "analytics": {
+        "path": "/easier-focus/app/analytics",
+        "purpose": "Detailed focus and productivity analytics",
+        "keyComponents": [
+          "Focus pattern visualization over time",
+          "Productivity trends and insights",
+          "Task completion analytics",
+          "Distraction pattern analysis",
+          "Focus quality scoring",
+          "Optimal focus time identification",
+          "Comparative analysis with benchmarks"
+        ]
+      },
+      "strategies": {
+        "path": "/easier-focus/app/strategies",
+        "purpose": "Personalized focus strategy library",
+        "keyComponents": [
+          "Evidence-based focus technique library",
+          "Personalized strategy recommendations",
+          "Strategy effectiveness tracking",
+          "Guided implementation of new techniques",
+          "ADHD-specific strategy collection",
+          "Strategy combination suggestions",
+          "Expert guidance and scientific backing"
+        ]
+      },
+      "moodEnergy": {
+        "path": "/easier-focus/app/mood",
+        "purpose": "Mood and energy tracking for optimal focus timing",
+        "keyComponents": [
+          "Mood and energy logging interface",
+          "Correlation analysis with focus quality",
+          "Optimal focus window recommendations",
+          "Intervention suggestions for low-energy periods",
+          "Circadian rhythm optimization",
+          "Sleep quality integration",
+          "Medication effectiveness tracking (optional)"
+        ]
+      },
+      "achievements": {
+        "path": "/easier-focus/app/achievements",
+        "purpose": "Gamification system for motivation and reinforcement",
+        "keyComponents": [
+          "Achievement system with progressive challenges",
+          "Focus streak tracking",
+          "Skill tree for focus technique mastery",
+          "Visual representation of progress",
+          "Customizable reward system",
+          "Community challenges and competitions",
+          "Milestone celebrations"
+        ]
+      },
+      "community": {
+        "path": "/easier-focus/app/community",
+        "purpose": "Social accountability and support features",
+        "keyComponents": [
+          "Focus buddies for accountability",
+          "Group challenges and competitions",
+          "Anonymous support forums",
+          "Expert Q&A sessions",
+          "Success story sharing",
+          "Resource library from community",
+          "Virtual co-working sessions"
+        ]
+      },
+      "settings": {
+        "path": "/easier-focus/app/settings",
+        "purpose": "Comprehensive personalization options",
+        "keyComponents": [
+          "Focus technique preferences",
+          "Notification settings",
+          "UI customization for ADHD-friendly experience",
+          "Data privacy and sharing controls",
+          "Integration with external tools",
+          "Accessibility options",
+          "Profile and account management"
+        ]
+      }
+    }
+  },
+  "enhancementProgressList": {
+    "TaskManagementSystem": {
+      "completionPercentage": 5,
+      "description": "ADHD-friendly task management with visual organization and cognitive load estimation",
+      "recentEnhancements": [
+        "Initial component structure"
+      ],
+      "pendingImprovements": [
+        "Implement visual task board with drag-and-drop interface",
+        "Create task breakdown system with microtasks",
+        "Add priority matrix with urgency/importance visualization",
+        "Implement cognitive load estimation algorithm",
+        "Add time blocking integration with calendar systems",
+        "Create task templates for recurring activities",
+        "Implement reward system for task completion",
+        "Add due date visualization with time perception aids",
+        "Create context-based task grouping",
+        "Implement executive function supports (starting/switching/completing)",
+        "Add voice input for quick task capture",
+        "Create emotional regulation tools for overwhelming task lists"
+      ],
+      "nextSteps": "Implement core task board with basic CRUD operations and ADHD-friendly visual design"
+    },
+    "PomodoroTimerSystem": {
+      "completionPercentage": 5,
+      "description": "Advanced Pomodoro technique implementation with customizable intervals and analytics",
+      "recentEnhancements": [
+        "Initial component structure"
+      ],
+      "pendingImprovements": [
+        "Implement timer with customizable work/break intervals",
+        "Add visual and audio notifications with accessibility options",
+        "Create session history tracking and analytics",
+        "Implement task integration for focused work periods",
+        "Add distraction logging during sessions",
+        "Create break activity suggestions based on cognitive science",
+        "Implement adaptive intervals based on focus patterns",
+        "Add flow state detection and extension options",
+        "Create different timer visualization options",
+        "Implement session chaining with progressive difficulty",
+        "Add ambient sound integration for focus enhancement",
+        "Create emergency break feature with mindfulness prompts"
+      ],
+      "nextSteps": "Implement core timer functionality with customizable intervals and basic notifications"
+    },
+    "DistractionBlockerSystem": {
+      "completionPercentage": 5,
+      "description": "Comprehensive distraction management with website/app blocking and pattern analysis",
+      "recentEnhancements": [
+        "Initial component structure"
+      ],
+      "pendingImprovements": [
+        "Implement website and app blocking during focus sessions",
+        "Create distraction pattern analysis dashboard",
+        "Add scheduled blocking periods with calendar integration",
+        "Implement allowlist/blocklist management interface",
+        "Add emergency override with reflection prompts",
+        "Create environmental distraction recommendations",
+        "Implement digital minimalism tools and guidance",
+        "Add progressive distraction reduction system",
+        "Create custom blocking rules and schedules",
+        "Implement distraction journaling with insights",
+        "Add social media usage analytics and limits",
+        "Create focus environment optimization guide"
+      ],
+      "nextSteps": "Implement basic website blocking functionality with allowlist/blocklist management"
+    },
+    "FocusSessionSystem": {
+      "completionPercentage": 5,
+      "description": "Structured focus session planning and tracking with multiple techniques",
+      "recentEnhancements": [
+        "Initial component structure"
+      ],
+      "pendingImprovements": [
+        "Implement multiple focus technique options (Pomodoro, deep work, etc.)",
+        "Add session scheduling with reminders and calendar integration",
+        "Create pre-session preparation checklists",
+        "Implement post-session reflection prompts and tracking",
+        "Add session analytics and insights dashboard",
+        "Create focus environment recommendations based on session type",
+        "Implement session templates for different work types",
+        "Add focus quality rating and feedback system",
+        "Create progressive session difficulty based on user progress",
+        "Implement focus streak tracking and visualization",
+        "Add location-based session settings",
+        "Create group/social focus sessions with accountability"
+      ],
+      "nextSteps": "Implement basic focus session creation, tracking, and history"
+    },
+    "AnalyticsSystem": {
+      "completionPercentage": 5,
+      "description": "Detailed focus and productivity analytics with actionable insights",
+      "recentEnhancements": [
+        "Initial component structure"
+      ],
+      "pendingImprovements": [
+        "Implement focus pattern visualization over time",
+        "Create productivity trends and insights dashboard",
+        "Add task completion analytics with patterns",
+        "Implement distraction pattern analysis with triggers",
+        "Create focus quality scoring algorithm",
+        "Add optimal focus time identification based on data",
+        "Implement comparative analysis with benchmarks",
+        "Add predictive modeling for focus challenges",
+        "Create personalized improvement recommendations",
+        "Implement progress tracking toward goals",
+        "Add exportable reports for healthcare providers",
+        "Create correlation analysis with external factors"
+      ],
+      "nextSteps": "Implement basic analytics dashboard with focus session visualization"
+    },
+    "StrategyLibrarySystem": {
+      "completionPercentage": 5,
+      "description": "Personalized focus strategy library with effectiveness tracking",
+      "recentEnhancements": [
+        "Initial component structure"
+      ],
+      "pendingImprovements": [
+        "Implement evidence-based focus technique library",
+        "Create personalized strategy recommendations engine",
+        "Add strategy effectiveness tracking and rating",
+        "Implement guided implementation of new techniques",
+        "Create ADHD-specific strategy collection",
+        "Add strategy combination suggestions based on needs",
+        "Implement expert guidance and scientific backing",
+        "Add strategy exploration and discovery tools",
+        "Create strategy scheduling based on task types",
+        "Implement A/B testing for strategy effectiveness",
+        "Add community-sourced strategy sharing",
+        "Create strategy adaptation based on user feedback"
+      ],
+      "nextSteps": "Implement basic strategy library with categorization and descriptions"
+    },
+    "MoodEnergySystem": {
+      "completionPercentage": 5,
+      "description": "Mood and energy tracking for optimal focus timing and interventions",
+      "recentEnhancements": [
+        "Initial component structure"
+      ],
+      "pendingImprovements": [
+        "Implement mood and energy logging interface",
+        "Create correlation analysis with focus quality",
+        "Add optimal focus window recommendations",
+        "Implement intervention suggestions for low-energy periods",
+        "Create circadian rhythm optimization tools",
+        "Add sleep quality integration and analysis",
+        "Implement medication effectiveness tracking (optional)",
+        "Add emotional regulation tools for focus recovery",
+        "Create energy conservation strategies for key tasks",
+        "Implement predictive modeling for energy fluctuations",
+        "Add environmental factors tracking (weather, noise, etc.)",
+        "Create personalized energy management plans"
+      ],
+      "nextSteps": "Implement basic mood and energy tracking interface with visualization"
+    },
+    "AchievementSystem": {
+      "completionPercentage": 5,
+      "description": "Gamification system for motivation and reinforcement",
+      "recentEnhancements": [
+        "Initial component structure"
+      ],
+      "pendingImprovements": [
+        "Implement achievement system with progressive challenges",
+        "Create focus streak tracking with visualization",
+        "Add skill tree for focus technique mastery",
+        "Implement visual representation of progress",
+        "Create customizable reward system with reinforcement",
+        "Add community challenges and competitions",
+        "Implement milestone celebrations with dopamine hooks",
+        "Add level system with meaningful progression",
+        "Create achievement sharing and social recognition",
+        "Implement daily/weekly challenges with variety",
+        "Add surprise rewards for consistency",
+        "Create narrative-based achievement journeys"
+      ],
+      "nextSteps": "Implement basic achievement system with core milestones and tracking"
+    },
+    "CommunitySystem": {
+      "completionPercentage": 5,
+      "description": "Social accountability and support features for sustained motivation",
+      "recentEnhancements": [
+        "Initial component structure"
+      ],
+      "pendingImprovements": [
+        "Implement focus buddies for accountability",
+        "Create group challenges and competitions",
+        "Add anonymous support forums for ADHD/focus issues",
+        "Implement expert Q&A sessions and scheduling",
+        "Create success story sharing platform",
+        "Add resource library from community contributions",
+        "Implement virtual co-working sessions with scheduling",
+        "Add accountability partnerships with check-ins",
+        "Create mentor/mentee matching system",
+        "Implement community goal setting and tracking",
+        "Add moderated discussion spaces by topic",
+        "Create community-driven tip sharing"
+      ],
+      "nextSteps": "Implement basic community features with profiles and accountability partnerships"
+    },
+    "SettingsSystem": {
+      "completionPercentage": 5,
+      "description": "Comprehensive personalization options for individual needs",
+      "recentEnhancements": [
+        "Initial component structure"
+      ],
+      "pendingImprovements": [
+        "Implement focus technique preferences and defaults",
+        "Create notification settings with granular control",
+        "Add UI customization for ADHD-friendly experience",
+        "Implement data privacy and sharing controls",
+        "Create integration with external tools and services",
+        "Add accessibility options for diverse needs",
+        "Implement profile and account management",
+        "Add theme customization with focus-optimized options",
+        "Create backup and data export functionality",
+        "Implement language and localization settings",
+        "Add keyboard shortcut customization",
+        "Create usage analytics and insights preferences"
+      ],
+      "nextSteps": "Implement basic settings interface with core preference options"
+    }
+  },
+  "databaseSchema": {
+    "overview": "Easier Focus uses Supabase as its database provider with direct REST API calls for all operations. The database follows a structured approach with clear naming conventions and relationships.",
+    "connectionDetails": {
+      "provider": "Supabase",
+      "apiEndpoint": "https://zoubqdwxemivxrjruvam.supabase.co",
+      "authMethod": "JWT with role-based access control",
+      "securityModel": "Row Level Security (RLS) for all tables",
+      "migrationDetails": {
+        "method": "Direct PostgreSQL connection using 'pg' library",
+        "connectionString": "postgresql://postgres.zoubqdwxemivxrjruvam:Superstrongpasswordfor5527@@@@aws-0-us-west-1.pooler.supabase.com:5432/postgres",
+        "script": "src/supabase/migration.ts",
+        "command": "npm run migrate",
+        "notes": "Password should be managed securely, e.g., via environment variables, and not hardcoded."
+      }
+    },
+    "coreTables": [
+      {
+        "name": "focus_sessions",
+        "purpose": "Store focus session data with timestamps and metadata",
+        "keyFields": [
+          "id: Primary key",
+          "user_id: Foreign key to auth.users",
+          "start_time: Timestamp when session started",
+          "end_time: Timestamp when session ended (null if ongoing)",
+          "duration_minutes: Calculated session duration",
+          "focus_type: Enumerated focus technique type",
+          "completed: Boolean indicating successful completion",
+          "notes: User notes about the session",
+          "task_id: Optional reference to associated task",
+          "distractions_count: Number of recorded distractions",
+          "focus_quality_rating: User-provided quality rating",
+          "environment_factors: JSONB with environmental data",
+          "created_at: Creation timestamp"
+        ],
+        "relationships": [
+          "Many-to-one with auth.users",
+          "Many-to-one with focus_tasks",
+          "One-to-many with focus_distractions"
+        ]
+      },
+      {
+        "name": "focus_tasks",
+        "purpose": "Store task data for focus sessions",
+        "keyFields": [
+          "id: Primary key",
+          "user_id: Foreign key to auth.users",
+          "title: Task title",
+          "description: Detailed task description",
+          "due_date: Optional deadline (TIMESTAMPTZ)",
+          "status: Enumerated status (todo, in_progress, completed)",
+          "priority: Enumerated priority level (low, medium, high)",
+          "estimated_minutes: User estimate of required time (INTEGER)",
+          "actual_minutes: Actual time spent on task (INTEGER)",
+          "cognitive_load_estimate: Estimated mental effort (1-10, INTEGER)",
+          "parent_task_id: Optional reference to parent task (UUID)",
+          "tags: Array of categorization tags (TEXT[])",
+          "order: Optional field for manual sorting (INTEGER)",
+          "scheduled_start_time: Optional start time for time blocking (TIMESTAMPTZ)",
+          "scheduled_end_time: Optional end time for time blocking (TIMESTAMPTZ)",
+          "created_at: Creation timestamp (TIMESTAMPTZ)",
+          "updated_at: Last update timestamp (TIMESTAMPTZ)"
+        ],
+        "relationships": [
+          "Many-to-one with auth.users",
+          "One-to-many with focus_sessions",
+          "Self-referential for task hierarchy"
+        ]
+      },
+      {
+        "name": "focus_stats",
+        "purpose": "Store aggregated focus statistics by day",
+        "keyFields": [
+          "id: Primary key",
+          "user_id: Foreign key to auth.users",
+          "date: Date of statistics",
+          "total_sessions: Count of sessions that day",
+          "total_minutes: Sum of focus minutes",
+          "longest_session: Duration of longest session",
+          "completed_tasks: Count of completed tasks",
+          "focus_score: Calculated focus quality score",
+          "average_cognitive_load: Average estimated load",
+          "distraction_count: Total recorded distractions",
+          "mood_energy_correlation: Calculated correlation",
+          "created_at: Creation timestamp"
+        ],
+        "relationships": [
+          "Many-to-one with auth.users"
+        ]
+      },
+      {
+        "name": "focus_settings",
+        "purpose": "Store user preferences for focus features",
+        "keyFields": [
+          "id: Primary key",
+          "user_id: Foreign key to auth.users",
+          "pomodoro_work_minutes: Default work interval",
+          "pomodoro_break_minutes: Default break interval",
+          "pomodoro_long_break_minutes: Default long break",
+          "pomodoro_long_break_interval: Sessions before long break",
+          "distraction_sites: Array of sites to block",
+          "notification_preferences: JSONB with notification settings",
+          "ui_preferences: JSONB with UI customization",
+          "default_focus_technique: Preferred technique",
+          "gamification_enabled: Boolean for achievement system",
+          "created_at: Creation timestamp"
+        ],
+        "relationships": [
+          "One-to-one with auth.users"
+        ]
+      },
+      {
+        "name": "focus_strategies",
+        "purpose": "Store focus techniques and their effectiveness",
+        "keyFields": [
+          "id: Primary key",
+          "user_id: Foreign key to auth.users",
+          "strategy_name: Name of focus technique",
+          "description: Detailed explanation",
+          "category: Categorization of technique",
+          "effectiveness_rating: User rating of effectiveness",
+          "times_used: Count of strategy usage",
+          "best_for_task_types: Array of suitable task types",
+          "scientific_backing: Reference to research",
+          "personalized_notes: User adaptations",
+          "created_at: Creation timestamp"
+        ],
+        "relationships": [
+          "Many-to-one with auth.users",
+          "Many-to-many with focus_sessions"
+        ]
+      },
+      {
+        "name": "focus_distractions",
+        "purpose": "Track distractions during focus sessions",
+        "keyFields": [
+          "id: Primary key",
+          "user_id: Foreign key to auth.users",
+          "session_id: Foreign key to focus_sessions",
+          "timestamp: When distraction occurred",
+          "type: Categorization of distraction",
+          "description: User description",
+          "duration_seconds: Estimated time lost",
+          "intervention_used: How user recovered focus",
+          "intervention_effectiveness: Rating of intervention",
+          "created_at: Creation timestamp"
+        ],
+        "relationships": [
+          "Many-to-one with auth.users",
+          "Many-to-one with focus_sessions"
+        ]
+      },
+      {
+        "name": "focus_moods",
+        "purpose": "Track mood and energy levels",
+        "keyFields": [
+          "id: Primary key",
+          "user_id: Foreign key to auth.users",
+          "timestamp: When entry was recorded",
+          "energy_level: Rating (1-10)",
+          "mood_rating: Rating (1-10)",
+          "stress_level: Rating (1-10)",
+          "focus_ability_estimate: User-estimated focus capacity",
+          "factors: JSONB with contributing factors",
+          "notes: User observations",
+          "created_at: Creation timestamp"
+        ],
+        "relationships": [
+          "Many-to-one with auth.users"
+        ]
+      },
+      {
+        "name": "focus_achievements",
+        "purpose": "Store gamification and milestone data",
+        "keyFields": [
+          "id: Primary key",
+          "user_id: Foreign key to auth.users",
+          "achievement_id: Reference to achievement definition",
+          "name: Achievement name",
+          "description: Achievement description",
+          "category: Achievement category",
+          "difficulty: Difficulty rating",
+          "progress: Numerical progress toward completion",
+          "completed: Boolean completion status",
+          "completion_date: When achievement was earned",
+          "reward: Associated reward",
+          "created_at: Creation timestamp"
+        ],
+        "relationships": [
+          "Many-to-one with auth.users"
+        ]
+      }
+    ],
+    "apiStrategy": {
+      "dataAccess": "All data access must use direct REST API calls to Supabase",
+      "authContext": "All API calls include authentication context for RLS",
+      "errorHandling": "Standardized error handling with user-friendly messages",
+      "requestFormat": "Consistent request formatting with appropriate parameters",
+      "responseFormat": "Standard response structure with pagination support",
+      "optimisticUI": "Frontend implements optimistic updates with rollback capability"
+    }
+  }
+} 

@@ -1,0 +1,1634 @@
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  Clock,
+  Volume2,
+  Focus,
+  Brain,
+  List,
+  CheckCircle,
+  ExternalLink,
+  ArrowRight,
+  AlertCircle,
+  Timer,
+  ZapOff,
+  PauseCircle,
+  PlayCircle,
+  Repeat,
+  RefreshCw,
+  Music,
+  VolumeX,
+  BookOpen,
+  Coffee,
+  Eye,
+  Plus,
+  Trash2,
+  ListTodo,
+  BarChart2,
+  Calendar,
+  RotateCcw,
+  Cloud,
+  CloudRain,
+  Lightbulb,
+  Zap,
+  Settings2,
+  Battery,
+  Info,
+  Book
+} from 'lucide-react';
+
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Slider } from '@/components/ui/slider';
+import { Progress } from '@/components/ui/progress';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Textarea } from '@/components/ui/textarea';
+import { TopNav } from "@/components/layout/TopNav";
+import { Todo } from '../components/Todo';
+
+// Simple Pomodoro Timer component
+const PomodoroTimer = () => {
+  const [minutes, setMinutes] = useState(25);
+  const [seconds, setSeconds] = useState(0);
+  const [isRunning, setIsRunning] = useState(false);
+  const [mode, setMode] = useState<'focus' | 'short' | 'long'>('focus');
+  const [cyclesCompleted, setCyclesCompleted] = useState(0);
+  const [currentTask, setCurrentTask] = useState("");
+  const [taskHistory, setTaskHistory] = useState<{task: string, duration: number, completed: boolean}[]>([]);
+  const [showSettings, setShowSettings] = useState(false);
+  const [customFocusTime, setCustomFocusTime] = useState(25);
+  const [customShortBreak, setCustomShortBreak] = useState(5);
+  const [customLongBreak, setCustomLongBreak] = useState(15);
+  const [timerSound, setTimerSound] = useState(true);
+  const [autoStartBreaks, setAutoStartBreaks] = useState(false);
+  const [autoStartPomodoros, setAutoStartPomodoros] = useState(false);
+  
+  // Timer color based on mode
+  const timerColor = mode === 'focus' ? 'text-red-500' : mode === 'short' ? 'text-green-500' : 'text-blue-500';
+  
+  const startTimer = () => setIsRunning(true);
+  const pauseTimer = () => setIsRunning(false);
+  const resetTimer = () => {
+    setIsRunning(false);
+    switch(mode) {
+      case 'focus':
+        setMinutes(customFocusTime);
+        break;
+      case 'short':
+        setMinutes(customShortBreak);
+        break;
+      case 'long':
+        setMinutes(customLongBreak);
+        break;
+    }
+    setSeconds(0);
+  };
+
+  const setTimerMode = (newMode: 'focus' | 'short' | 'long') => {
+    setIsRunning(false);
+    setMode(newMode);
+    switch(newMode) {
+      case 'focus':
+        setMinutes(customFocusTime);
+        break;
+      case 'short':
+        setMinutes(customShortBreak);
+        break;
+      case 'long':
+        setMinutes(customLongBreak);
+        break;
+    }
+    setSeconds(0);
+  };
+  
+  // Calculate progress percentage
+  const calculateProgress = () => {
+    const totalSeconds = mode === 'focus' 
+      ? customFocusTime * 60 
+      : mode === 'short' 
+        ? customShortBreak * 60 
+        : customLongBreak * 60;
+    
+    const currentSeconds = minutes * 60 + seconds;
+    return (currentSeconds / totalSeconds) * 100;
+  };
+  
+  // Add task to history when focus session completes
+  const completeSession = () => {
+    if (mode === 'focus' && currentTask) {
+      setTaskHistory(prev => [
+        { task: currentTask, duration: customFocusTime, completed: true },
+        ...prev
+      ]);
+    }
+    
+    setCyclesCompleted(prev => prev + 1);
+    
+    // Play sound if enabled
+    if (timerSound) {
+      const audio = new Audio('/notification.mp3');
+      audio.play().catch(e => console.error('Error playing sound:', e));
+    }
+    
+    // Auto transition to next mode
+    if (mode === 'focus') {
+      const nextMode = (cyclesCompleted + 1) % 4 === 0 ? 'long' : 'short';
+      setTimerMode(nextMode);
+      if ((nextMode === 'short' && autoStartBreaks) || (nextMode === 'long' && autoStartBreaks)) {
+        setIsRunning(true);
+      }
+    } else {
+      setTimerMode('focus');
+      if (autoStartPomodoros) {
+        setIsRunning(true);
+      }
+    }
+  };
+
+  // Format time as mm:ss
+  const formattedTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  
+  // Effect for countdown
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+    
+    if (isRunning) {
+      interval = setInterval(() => {
+        if (seconds === 0) {
+          if (minutes === 0) {
+            // Timer complete
+            clearInterval(interval!);
+            setIsRunning(false);
+            completeSession();
+          } else {
+            setMinutes(minutes - 1);
+            setSeconds(59);
+          }
+        } else {
+          setSeconds(seconds - 1);
+        }
+      }, 1000);
+    } else if (interval) {
+      clearInterval(interval);
+    }
+    
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isRunning, minutes, seconds]);
+
+  return (
+    <Card className="w-full max-w-md mx-auto">
+      <CardHeader className="border-b bg-muted/50">
+        <CardTitle className="flex items-center justify-between">
+          Enhanced Pomodoro Timer
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => setShowSettings(!showSettings)}
+            className="h-8 w-8"
+          >
+            <Settings2 className="h-4 w-4" />
+          </Button>
+        </CardTitle>
+        <CardDescription>
+          Use time-boxing to boost productivity and focus
+        </CardDescription>
+      </CardHeader>
+      
+      <CardContent className="space-y-6 pt-6">
+        {/* Task input */}
+        <div className="space-y-2">
+          <Label htmlFor="current-task">What are you working on?</Label>
+          <Input 
+            id="current-task" 
+            placeholder="Enter your task here..." 
+            value={currentTask}
+            onChange={(e) => setCurrentTask(e.target.value)}
+            disabled={isRunning && mode === 'focus'}
+          />
+          </div>
+        
+        {/* Timer display */}
+        <div className="text-center py-4">
+          <div className={`text-7xl font-mono font-bold ${timerColor}`}>{formattedTime}</div>
+          <Progress 
+            value={calculateProgress()} 
+            className="h-2"
+          />
+          <div className="text-sm text-muted-foreground mt-3 flex items-center justify-center gap-2">
+            {mode === 'focus' ? (
+              <>
+                <Clock className="h-4 w-4" />
+                <span>Focus Session</span>
+              </>
+            ) : mode === 'short' ? (
+              <>
+                <Coffee className="h-4 w-4" />
+                <span>Short Break</span>
+              </>
+            ) : (
+              <>
+                <Battery className="h-4 w-4" />
+                <span>Long Break</span>
+              </>
+            )}
+          </div>
+        </div>
+        
+        {/* Controls */}
+        <div className="flex justify-center gap-2">
+          {!isRunning ? (
+            <Button onClick={startTimer} className="gap-1 w-28">
+              <PlayCircle className="h-4 w-4" />
+              Start
+            </Button>
+          ) : (
+            <Button onClick={pauseTimer} variant="outline" className="gap-1 w-28">
+              <PauseCircle className="h-4 w-4" />
+              Pause
+            </Button>
+          )}
+          <Button onClick={resetTimer} variant="outline" className="gap-1 w-28">
+            <RefreshCw className="h-4 w-4" />
+            Reset
+          </Button>
+        </div>
+        
+        {/* Timer modes */}
+        <div className="flex justify-between gap-2 pt-2">
+          <Button 
+            variant={mode === 'focus' ? 'default' : 'outline'} 
+            size="sm"
+            onClick={() => setTimerMode('focus')}
+            className={mode === 'focus' ? 'bg-red-500 hover:bg-red-600' : ''}
+          >
+            Focus ({customFocusTime}m)
+          </Button>
+          <Button 
+            variant={mode === 'short' ? 'default' : 'outline'} 
+            size="sm"
+            onClick={() => setTimerMode('short')}
+            className={mode === 'short' ? 'bg-green-500 hover:bg-green-600' : ''}
+          >
+            Short ({customShortBreak}m)
+          </Button>
+          <Button 
+            variant={mode === 'long' ? 'default' : 'outline'} 
+            size="sm"
+            onClick={() => setTimerMode('long')}
+            className={mode === 'long' ? 'bg-blue-500 hover:bg-blue-600' : ''}
+          >
+            Long ({customLongBreak}m)
+          </Button>
+      </div>
+        
+        {/* Settings panel */}
+        <AnimatePresence>
+          {showSettings && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="border rounded-md p-4 mt-4 space-y-4 overflow-hidden"
+            >
+              <h3 className="font-medium">Timer Settings</h3>
+              
+              <div className="space-y-2">
+                <Label htmlFor="focus-time">Focus duration (minutes)</Label>
+                <Input 
+                  id="focus-time" 
+                  type="number" 
+                  min="1"
+                  max="60"
+                  value={customFocusTime}
+                  onChange={(e) => setCustomFocusTime(parseInt(e.target.value) || 25)}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="short-break">Short break (minutes)</Label>
+                <Input 
+                  id="short-break" 
+                  type="number"
+                  min="1"
+                  max="15" 
+                  value={customShortBreak}
+                  onChange={(e) => setCustomShortBreak(parseInt(e.target.value) || 5)}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="long-break">Long break (minutes)</Label>
+                <Input 
+                  id="long-break" 
+                  type="number"
+                  min="5"
+                  max="30" 
+                  value={customLongBreak}
+                  onChange={(e) => setCustomLongBreak(parseInt(e.target.value) || 15)}
+                />
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <Switch 
+                  id="timer-sound" 
+                  checked={timerSound}
+                  onCheckedChange={setTimerSound}
+                />
+                <Label htmlFor="timer-sound">Play sound when timer ends</Label>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <Switch 
+                  id="auto-breaks" 
+                  checked={autoStartBreaks}
+                  onCheckedChange={setAutoStartBreaks}
+                />
+                <Label htmlFor="auto-breaks">Auto-start breaks</Label>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <Switch 
+                  id="auto-pomodoros" 
+                  checked={autoStartPomodoros}
+                  onCheckedChange={setAutoStartPomodoros}
+                />
+                <Label htmlFor="auto-pomodoros">Auto-start focus sessions</Label>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+        
+        {/* Stats */}
+        <div className="pt-2 flex justify-between text-sm text-muted-foreground">
+          <div className="flex items-center gap-1">
+            <Badge variant="outline" className="font-normal">
+              <Repeat className="mr-1 h-3 w-3" /> {cyclesCompleted} cycles
+            </Badge>
+          </div>
+          
+          <div className="flex items-center gap-1">
+            <Badge variant="outline" className="font-normal">
+              <Clock className="mr-1 h-3 w-3" /> {cyclesCompleted * customFocusTime} mins focused
+            </Badge>
+          </div>
+        </div>
+      </CardContent>
+      
+      {/* Task History */}
+      {taskHistory.length > 0 && (
+        <CardFooter className="flex-col border-t pt-4">
+          <div className="w-full">
+            <h3 className="text-sm font-medium mb-2">Recent Sessions</h3>
+            <div className="space-y-1 max-h-32 overflow-y-auto">
+              {taskHistory.slice(0, 5).map((task, i) => (
+                <div key={i} className="flex justify-between items-center text-sm">
+                  <span className="truncate max-w-[220px]">{task.task}</span>
+                  <Badge variant="secondary" className="ml-auto">
+                    {task.duration}m
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          </div>
+        </CardFooter>
+      )}
+    </Card>
+  );
+};
+
+// White Noise Generator component
+const WhiteNoiseGenerator = () => {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [volume, setVolume] = useState([50]);
+  const [sound, setSound] = useState("rain");
+  const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
+  const [gainNode, setGainNode] = useState<GainNode | null>(null);
+  const [noiseNode, setNoiseNode] = useState<OscillatorNode | AudioBufferSourceNode | null>(null);
+  const [visualize, setVisualize] = useState(true);
+  const [presetTimer, setPresetTimer] = useState<number | null>(null);
+  const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const animationRef = useRef<number | null>(null);
+
+  const soundOptions = [
+    {
+      id: "white",
+      icon: <div><Cloud className="h-4 w-4" /></div>,
+      label: "White Noise",
+      description: "Consistent static sound that masks all frequencies equally",
+      color: "bg-gray-500"
+    },
+    {
+      id: "pink",
+      icon: <div><Cloud className="h-4 w-4" /></div>,
+      label: "Pink Noise",
+      description: "Deeper noise that's more balanced and natural sounding",
+      color: "bg-pink-300"
+    },
+    {
+      id: "brown",
+      icon: <div><Cloud className="h-4 w-4" /></div>,
+      label: "Brown Noise",
+      description: "Low frequency noise similar to a waterfall or heavy rain",
+      color: "bg-amber-700"
+    },
+    {
+      id: "rain",
+      icon: <div><CloudRain className="h-4 w-4" /></div>,
+      label: "Rainfall",
+      description: "Gentle rainfall sounds for relaxation",
+      color: "bg-blue-400"
+    },
+    {
+      id: "cafe",
+      icon: <div><Coffee className="h-4 w-4" /></div>,
+      label: "Cafe Ambience",
+      description: "Background chatter and coffee shop sounds",
+      color: "bg-amber-500"
+    },
+    {
+      id: "forest",
+      icon: <div><Cloud className="h-4 w-4" /></div>,
+      label: "Forest Sounds",
+      description: "Peaceful forest with birds and gentle breeze",
+      color: "bg-green-600"
+    },
+    {
+      id: "ocean",
+      icon: <div><CloudRain className="h-4 w-4" /></div>,
+      label: "Ocean Waves",
+      description: "Gentle waves crashing on the shore",
+      color: "bg-blue-500"
+    },
+    {
+      id: "fire",
+      icon: <div><Zap className="h-4 w-4" /></div>,
+      label: "Crackling Fire",
+      description: "Cozy fireplace sounds",
+      color: "bg-orange-500"
+    },
+  ];
+
+  const currentSound = soundOptions.find(s => s.id === sound) || soundOptions[0];
+
+  const drawVisualizer = () => {
+    if (!audioContext || !canvasRef.current || !visualize) return;
+    
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    
+    const width = canvas.width;
+    const height = canvas.height;
+    
+    // Clear canvas
+    ctx.clearRect(0, 0, width, height);
+    
+    // Get analyzer data
+    const analyzer = audioContext.createAnalyser();
+    analyzer.fftSize = 2048;
+    
+    if (gainNode) {
+      gainNode.connect(analyzer);
+    }
+    
+    const bufferLength = analyzer.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
+    analyzer.getByteTimeDomainData(dataArray);
+    
+    // Set line style
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--primary');
+    
+    // Draw wave
+    ctx.beginPath();
+    
+    const sliceWidth = width / bufferLength;
+    let x = 0;
+    
+    for (let i = 0; i < bufferLength; i++) {
+      const v = dataArray[i] / 128.0;
+      const y = v * (height / 2);
+      
+      if (i === 0) {
+        ctx.moveTo(x, y);
+      } else {
+        ctx.lineTo(x, y);
+      }
+      
+      x += sliceWidth;
+    }
+    
+    ctx.lineTo(width, height / 2);
+    ctx.stroke();
+    
+    // Recursive call for animation
+    animationRef.current = requestAnimationFrame(drawVisualizer);
+  };
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && !audioContext) {
+      setAudioContext(new (window.AudioContext || (window as any).webkitAudioContext)());
+    }
+    
+    return () => {
+      if (audioContext) {
+        audioContext.close();
+      }
+      
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    // Timer effect
+    if (presetTimer && isPlaying) {
+      setTimeRemaining(presetTimer * 60);
+      
+      const timerInterval = setInterval(() => {
+        setTimeRemaining(prev => {
+          if (prev === null || prev <= 1) {
+            clearInterval(timerInterval);
+            setIsPlaying(false);
+            setPresetTimer(null);
+            return null;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      
+      return () => clearInterval(timerInterval);
+    }
+  }, [presetTimer, isPlaying]);
+
+  useEffect(() => {
+    if (visualize && isPlaying && audioContext) {
+      drawVisualizer();
+    } else if (animationRef.current) {
+      cancelAnimationFrame(animationRef.current);
+    }
+
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, [visualize, isPlaying, audioContext]);
+
+  const togglePlayback = () => {
+    if (!audioContext) return;
+
+    if (isPlaying) {
+      // Stop playback
+      if (noiseNode) {
+        noiseNode.stop();
+        setNoiseNode(null);
+      }
+      setIsPlaying(false);
+      
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    } else {
+      // Start playback
+      let source;
+      
+      // Create gain node if it doesn't exist
+      if (!gainNode) {
+        const newGainNode = audioContext.createGain();
+        newGainNode.gain.value = volume[0] / 100;
+        newGainNode.connect(audioContext.destination);
+        setGainNode(newGainNode);
+      }
+      
+      // Create the appropriate noise type
+      if (sound === 'white' || sound === 'pink' || sound === 'brown') {
+        // Create buffer for noise
+    const bufferSize = 2 * audioContext.sampleRate;
+    const noiseBuffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+    const output = noiseBuffer.getChannelData(0);
+    
+        // Fill buffer with noise
+    for (let i = 0; i < bufferSize; i++) {
+          if (sound === 'white') {
+      output[i] = Math.random() * 2 - 1;
+          } else if (sound === 'pink') {
+            // Simple approximation of pink noise
+            output[i] = (Math.random() * 2 - 1) * 0.5 + (Math.random() * 2 - 1) * 0.3 + (Math.random() * 2 - 1) * 0.2;
+          } else if (sound === 'brown') {
+            // Simple approximation of brown noise
+            output[i] = (Math.random() * 2 - 1) * 0.5 + output[Math.max(0, i - 1)] * 0.5;
+          }
+        }
+        
+        // Create source from buffer
+        source = audioContext.createBufferSource();
+    source.buffer = noiseBuffer;
+    source.loop = true;
+      } else {
+        // For other sounds, we would normally use audio files
+        // Using oscillator as a placeholder for demo
+        source = audioContext.createOscillator();
+        
+        if (sound === 'rain') {
+          (source as OscillatorNode).type = 'sine';
+          (source as OscillatorNode).frequency.value = 100;
+        } else if (sound === 'cafe') {
+          (source as OscillatorNode).type = 'triangle';
+          (source as OscillatorNode).frequency.value = 85;
+        } else if (sound === 'forest') {
+          (source as OscillatorNode).type = 'sine';
+          (source as OscillatorNode).frequency.value = 60;
+        } else if (sound === 'ocean') {
+          (source as OscillatorNode).type = 'sine'; 
+          (source as OscillatorNode).frequency.value = 40;
+        } else if (sound === 'fire') {
+          (source as OscillatorNode).type = 'sawtooth';
+          (source as OscillatorNode).frequency.value = 75;
+        }
+      }
+      
+      source.connect(gainNode!);
+        source.start();
+        setNoiseNode(source);
+      setIsPlaying(true);
+      
+      if (visualize) {
+        drawVisualizer();
+      }
+    }
+  };
+
+  const handleVolumeChange = (newVolume: number[]) => {
+    setVolume(newVolume);
+    if (gainNode) {
+      gainNode.gain.value = newVolume[0] / 100;
+    }
+  };
+
+  const setTimerPreset = (minutes: number) => {
+    setPresetTimer(minutes);
+    if (!isPlaying) {
+      togglePlayback();
+    }
+  };
+
+  return (
+    <Card className="w-full max-w-md mx-auto">
+      <CardHeader className="border-b bg-muted/50">
+        <CardTitle>Ambient Sound Generator</CardTitle>
+        <CardDescription>
+          Enhance focus with background sounds that mask distractions
+        </CardDescription>
+      </CardHeader>
+      
+      <CardContent className="space-y-6 pt-6">
+        {/* Visualization */}
+        {visualize && (
+          <div className={`h-32 rounded-md overflow-hidden ${currentSound.color} bg-opacity-10 relative`}>
+            <canvas 
+              ref={canvasRef} 
+              width={500} 
+              height={128} 
+              className="w-full h-full"
+            />
+            
+            {!isPlaying && (
+              <div className="absolute inset-0 flex items-center justify-center bg-background/50">
+                <Button onClick={togglePlayback} variant="secondary" size="lg" className="gap-2">
+                  <PlayCircle className="h-5 w-5" />
+                  Start Listening
+                </Button>
+              </div>
+            )}
+            
+            {timeRemaining !== null && (
+              <div className="absolute top-2 right-2">
+                <Badge variant="secondary">
+                  <Clock className="h-3 w-3 mr-1" />
+                  {formatTime(timeRemaining)}
+                </Badge>
+              </div>
+            )}
+          </div>
+        )}
+        
+        {/* Sound selector */}
+        <div className="space-y-2">
+          <Label htmlFor="sound-select">Sound Type</Label>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            {soundOptions.map((s) => (
+              <Button
+                key={s.id}
+                variant={sound === s.id ? "default" : "outline"}
+                className="h-auto py-2 justify-start gap-2 text-xs sm:text-sm flex-col items-center"
+                onClick={() => setSound(s.id)}
+              >
+                <div className={`w-8 h-8 rounded-full ${s.color} flex items-center justify-center text-white`}>
+                  {s.icon.props.children}
+                </div>
+                <span className="text-center w-full truncate">{s.label}</span>
+            </Button>
+            ))}
+          </div>
+          </div>
+          
+        {/* Volume control */}
+          <div className="space-y-2">
+          <div className="flex justify-between">
+            <Label htmlFor="volume">Volume</Label>
+            <span className="text-sm text-muted-foreground">{volume[0]}%</span>
+            </div>
+            <Slider
+              id="volume"
+              min={0}
+              max={100}
+              step={1}
+              value={volume}
+            onValueChange={handleVolumeChange}
+          />
+          </div>
+
+        {/* Playback controls */}
+        <div className="flex flex-col gap-4">
+          <div className="flex gap-2">
+        <Button 
+              onClick={togglePlayback} 
+              className="flex-1"
+              variant={isPlaying ? "outline" : "default"}
+        >
+          {isPlaying ? (
+            <>
+                  <VolumeX className="mr-2 h-4 w-4" />
+                    Stop
+            </>
+          ) : (
+            <>
+                  <Volume2 className="mr-2 h-4 w-4" />
+                    Play
+            </>
+          )}
+        </Button>
+            
+            <Button 
+              variant="outline"
+              onClick={() => setVisualize(!visualize)}
+              className="flex-1"
+            >
+              {visualize ? (
+                <>
+                  <Eye className="mr-2 h-4 w-4" />
+                  Hide Waves
+                </>
+              ) : (
+                <>
+                  <Eye className="mr-2 h-4 w-4" />
+                  Show Waves
+                </>
+              )}
+            </Button>
+          </div>
+
+          {/* Timer presets */}
+          <div className="space-y-2">
+            <Label>Set Timer</Label>
+            <div className="flex flex-wrap gap-2">
+              {[15, 30, 45, 60].map(minutes => (
+                <Button 
+                  key={minutes} 
+                  variant="outline" 
+                  size="sm"
+                  className={presetTimer === minutes ? "border-primary" : ""}
+                  onClick={() => setTimerPreset(minutes)}
+                >
+                  {minutes} min
+                </Button>
+              ))}
+              
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => {
+                  setPresetTimer(null);
+                  setTimeRemaining(null);
+                }}
+                className={!presetTimer ? "border-primary" : ""}
+              >
+                Continuous
+              </Button>
+            </div>
+          </div>
+        </div>
+        
+        {/* Description */}
+        <div className="rounded-lg bg-muted p-3 text-sm">
+          <div className="flex items-start gap-2">
+            <Info className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+            <div>
+              <p className="font-medium">{currentSound.label}</p>
+              <p className="text-muted-foreground">{currentSound.description}</p>
+            </div>
+          </div>
+          </div>
+        </CardContent>
+      
+      <CardFooter className="flex-col border-t pt-4">
+        <div className="text-xs text-muted-foreground">
+          <p>Background sounds can mask distractions and create a consistent focus environment. Different sound types have unique benefits for various cognitive tasks.</p>
+        </div>
+      </CardFooter>
+    </Card>
+  );
+};
+
+// Quick Tasks component
+const QuickTasks = () => {
+  const [tasks, setTasks] = useState<Array<{ id: string; text: string; completed: boolean; createdAt: Date }>>([]);
+  const [newTask, setNewTask] = useState("");
+  const [filter, setFilter] = useState<"all" | "active" | "completed">("all");
+
+  const addTask = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newTask.trim()) {
+      setTasks([
+        ...tasks,
+        {
+          id: Math.random().toString(36).substr(2, 9),
+          text: newTask.trim(),
+          completed: false,
+          createdAt: new Date()
+        }
+      ]);
+      setNewTask("");
+    }
+  };
+
+  const toggleTask = (id: string) => {
+    setTasks(tasks.map(task =>
+      task.id === id ? { ...task, completed: !task.completed } : task
+    ));
+  };
+
+  const deleteTask = (id: string) => {
+    setTasks(tasks.filter(task => task.id !== id));
+  };
+
+  const filteredTasks = tasks.filter(task => {
+    if (filter === "active") return !task.completed;
+    if (filter === "completed") return task.completed;
+    return true;
+  });
+
+  const clearCompleted = () => {
+    setTasks(tasks.filter(task => !task.completed));
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+    <Card className="w-full max-w-md mx-auto">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <CheckCircle className="h-5 w-5" />
+            Quick Tasks
+        </CardTitle>
+        <CardDescription>
+            Track and manage your focus tasks
+        </CardDescription>
+      </CardHeader>
+        <CardContent className="space-y-4">
+          <form onSubmit={addTask} className="flex gap-2">
+            <Input
+              type="text"
+              placeholder="Add a new task..."
+              value={newTask}
+              onChange={(e) => setNewTask(e.target.value)}
+              className="flex-1"
+            />
+            <Button type="submit" size="icon" className="shrink-0">
+              <Plus className="h-4 w-4" />
+              <span className="sr-only">Add task</span>
+            </Button>
+          </form>
+
+          <div className="flex gap-2">
+            {["all", "active", "completed"].map((f) => (
+              <Button
+                key={f}
+                variant={filter === f ? "default" : "outline"}
+                size="sm"
+                onClick={() => setFilter(f as typeof filter)}
+                className="capitalize"
+              >
+                {f}
+              </Button>
+            ))}
+          </div>
+
+          <motion.div layout className="space-y-2">
+            {filteredTasks.length === 0 ? (
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-center text-sm text-muted-foreground py-4"
+              >
+                No {filter === "all" ? "" : filter} tasks
+              </motion.p>
+            ) : (
+              <AnimatePresence mode="popLayout">
+                {filteredTasks.map((task) => (
+                  <motion.div
+                    key={task.id}
+                    layout
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+                      <Checkbox
+                checked={task.completed} 
+                        onCheckedChange={() => toggleTask(task.id)}
+                        className="data-[state=checked]:bg-green-500"
+                      />
+                      <motion.span
+                        layout
+                        style={{
+                          textDecoration: task.completed ? "line-through" : "none",
+                          opacity: task.completed ? 0.5 : 1
+                        }}
+                        className="flex-1"
+              >
+                {task.text}
+                      </motion.span>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => deleteTask(task.id)}
+                        className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        <span className="sr-only">Delete task</span>
+                      </Button>
+            </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            )}
+          </motion.div>
+
+          {tasks.some(task => task.completed) && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="flex justify-end"
+            >
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={clearCompleted}
+                className="text-muted-foreground"
+              >
+                Clear completed
+        </Button>
+            </motion.div>
+          )}
+        </CardContent>
+    </Card>
+    </motion.div>
+  );
+};
+
+// Reading Focus
+const ReadingFocus = () => {
+  const [text, setText] = useState("");
+  const [wpm, setWpm] = useState([300]);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentWordIndex, setCurrentWordIndex] = useState(0);
+  const [progress, setProgress] = useState(0);
+  const [fontSize, setFontSize] = useState([16]);
+  const [lineHeight, setLineHeight] = useState([1.5]);
+  const [darkMode, setDarkMode] = useState(false);
+  const [bionic, setBionic] = useState(false);
+
+  const words = text.trim().split(/\s+/);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isPlaying && currentWordIndex < words.length) {
+      interval = setInterval(() => {
+        setCurrentWordIndex(i => {
+          const next = i + 1;
+          setProgress((next / words.length) * 100);
+          if (next >= words.length) {
+            setIsPlaying(false);
+          }
+          return next;
+        });
+      }, (60 / wpm[0]) * 1000);
+    }
+    return () => clearInterval(interval);
+  }, [isPlaying, currentWordIndex, words.length, wpm]);
+
+  const reset = () => {
+    setCurrentWordIndex(0);
+    setProgress(0);
+    setIsPlaying(false);
+  };
+
+  const bionicWord = (word: string) => {
+    if (!bionic || word.length <= 1) return word;
+    const mid = Math.ceil(word.length / 2);
+  return (
+      <span>
+        <span className="font-bold">{word.slice(0, mid)}</span>
+        {word.slice(mid)}
+      </span>
+    );
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      <Card className={`w-full max-w-2xl mx-auto ${darkMode ? "dark" : ""}`}>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+            <BookOpen className="h-5 w-5" />
+            Reading Focus
+        </CardTitle>
+        <CardDescription>
+            Speed reading and text focus tools
+        </CardDescription>
+      </CardHeader>
+        <CardContent className="space-y-6">
+        <div className="space-y-4">
+            <Textarea
+              placeholder="Paste your text here..."
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              className="min-h-[100px] font-mono"
+            />
+            
+            {text && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="space-y-6"
+              >
+                <div className="p-8 rounded-lg bg-muted relative overflow-hidden">
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5"
+                    animate={{
+                      x: ["0%", "100%"],
+                    }}
+                    transition={{
+                      duration: 3,
+                      repeat: Infinity,
+                      ease: "linear",
+                    }}
+                  />
+                  
+                  <div 
+                    className="relative text-center"
+                    style={{
+                      fontSize: `${fontSize[0]}px`,
+                      lineHeight: lineHeight[0],
+                    }}
+                  >
+                    {currentWordIndex < words.length ? (
+                      <motion.div
+                        key={currentWordIndex}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                      >
+                        {bionicWord(words[currentWordIndex])}
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="text-muted-foreground"
+                      >
+                        Reading complete!
+                      </motion.div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="flex justify-center space-x-2">
+                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                      <Button
+                        onClick={() => setIsPlaying(!isPlaying)}
+                        size="lg"
+                        className="rounded-full px-8"
+                        disabled={currentWordIndex >= words.length}
+                      >
+                        {isPlaying ? (
+                          <>
+                            <PauseCircle className="mr-2 h-5 w-5" />
+                            Pause
+                          </>
+                        ) : (
+                          <>
+                            <PlayCircle className="mr-2 h-5 w-5" />
+                            {currentWordIndex === 0 ? "Start" : "Resume"}
+                          </>
+                        )}
+              </Button>
+                    </motion.div>
+                    
+                    {(currentWordIndex > 0 || isPlaying) && (
+                      <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                        <Button
+                          onClick={reset}
+                          variant="outline"
+                          size="lg"
+                          className="rounded-full px-8"
+                        >
+                          <RefreshCw className="mr-2 h-5 w-5" />
+                          Reset
+              </Button>
+                      </motion.div>
+                    )}
+          </div>
+          
+                  <Progress value={progress} className="h-2" />
+                  
+                  <div className="grid gap-6 md:grid-cols-2">
+          <div className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <Label>Reading Speed (WPM)</Label>
+                        <Badge variant="outline">{wpm} WPM</Badge>
+                      </div>
+              <Slider
+                        min={100}
+                        max={1000}
+                step={10}
+                        value={wpm}
+                        onValueChange={setWpm}
+              />
+            </div>
+
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <Label>Font Size</Label>
+                        <Badge variant="outline">{fontSize}px</Badge>
+                      </div>
+                      <Slider
+                        min={12}
+                        max={32}
+                        step={1}
+                        value={fontSize}
+                        onValueChange={setFontSize}
+                      />
+          </div>
+          
+          <div className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <Label>Line Height</Label>
+                        <Badge variant="outline">{lineHeight}</Badge>
+            </div>
+                      <Slider
+                        min={1}
+                        max={2}
+                        step={0.1}
+                        value={lineHeight}
+                        onValueChange={setLineHeight}
+                      />
+          </div>
+
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor="dark-mode">Dark Mode</Label>
+                        <Switch
+                          id="dark-mode"
+                          checked={darkMode}
+                          onCheckedChange={setDarkMode}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor="bionic">Bionic Reading</Label>
+                        <Switch
+                          id="bionic"
+                          checked={bionic}
+                          onCheckedChange={setBionic}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="text-sm text-muted-foreground text-center">
+                    {words.length} words • Estimated time: {Math.ceil(words.length / wpm[0])} minutes
+                  </div>
+                </div>
+              </motion.div>
+            )}
+        </div>
+      </CardContent>
+    </Card>
+    </motion.div>
+  );
+};
+
+// Simple Todo List Component
+const SimpleToDoList = () => {
+  return <Todo quickMode limit={5} />
+}
+
+// Simple Focus Tips
+const FocusTips = () => {
+  const tips = [
+    {
+      title: "The Two-Minute Rule",
+      description: "If a task takes less than two minutes, do it immediately instead of putting it off."
+    },
+    {
+      title: "Time Boxing",
+      description: "Allocate a fixed time period to a planned activity, to increase focus and productivity."
+    },
+    {
+      title: "The 20-Second Rule",
+      description: "Make good habits 20 seconds easier to start and bad habits 20 seconds harder to begin."
+    },
+    {
+      title: "Single-Tasking",
+      description: "Focus on one task at a time instead of multitasking, which reduces cognitive efficiency."
+    },
+    {
+      title: "The 52/17 Rule",
+      description: "Work for 52 minutes, then take a 17-minute break for optimal productivity."
+    }
+  ];
+  
+  return (
+    <Card className="w-full max-w-md mx-auto">
+      <CardHeader>
+        <CardTitle>Focus Techniques</CardTitle>
+        <CardDescription>
+          Simple techniques to improve your focus and productivity
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <ul className="space-y-4">
+          {tips.map((tip, index) => (
+            <li key={index} className="border-b pb-3 last:border-b-0 last:pb-0">
+              <h3 className="font-medium">{tip.title}</h3>
+              <p className="text-sm text-muted-foreground">{tip.description}</p>
+            </li>
+          ))}
+        </ul>
+      </CardContent>
+      <CardFooter>
+        <Button variant="outline" className="w-full gap-1">
+          <ExternalLink className="h-4 w-4" />
+          Learn More Focus Techniques
+        </Button>
+      </CardFooter>
+    </Card>
+  );
+};
+
+const WebTools = () => {
+  const [activeTab, setActiveTab] = useState('pomodoro');
+  
+  // Tools data with descriptions and features
+  const toolsData = [
+    {
+      id: 'pomodoro',
+      title: 'Pomodoro Timer',
+      description: 'Enhanced focus timer with customizable sessions and breaks',
+      icon: <Clock className="h-6 w-6" />,
+      features: [
+        'Customizable focus and break durations',
+        'Visual progress tracking',
+        'Task history and statistics',
+        'Audio notifications',
+        'Auto-start options for continuous flow'
+      ],
+      component: <PomodoroTimer />
+    },
+    {
+      id: 'noise',
+      title: 'White Noise Generator',
+      description: 'Create the perfect acoustic environment for deep work',
+      icon: <Volume2 className="h-6 w-6" />,
+      features: [
+        'Multiple ambient sound options',
+        'Visual audio representation',
+        'Timer settings for sound sessions',
+        'Volume and mix controls',
+        'Background play support'
+      ],
+      component: <WhiteNoiseGenerator />
+    },
+    {
+      id: 'reading',
+      title: 'Reading Focus',
+      description: 'Enhance reading comprehension and speed with guided tools',
+      icon: <BookOpen className="h-6 w-6" />,
+      features: [
+        'Bionic reading mode',
+        'Line focus highlighting',
+        'Reading speed control',
+        'Distraction-free interface',
+        'Text size and format adjustments'
+      ],
+      component: <ReadingFocus />
+    },
+    {
+      id: 'tasks',
+      title: 'Quick Tasks',
+      description: 'Rapidly capture and manage tasks without losing focus',
+      icon: <ListTodo className="h-6 w-6" />,
+      features: [
+        'One-click task creation',
+        'Completion tracking',
+        'Simple priority system',
+        'Clear completed tasks',
+        'Minimalist design for quick interactions'
+      ],
+      component: <QuickTasks />
+    },
+    {
+      id: 'tips',
+      title: 'Focus Tips',
+      description: 'Science-backed techniques to improve your concentration',
+      icon: <Lightbulb className="h-6 w-6" />,
+      features: [
+        'Randomized focus strategies',
+        'ADHD-specific techniques',
+        'Quick implementation guides',
+        'Contextual recommendations',
+        'Science-backed methods'
+      ],
+      component: <FocusTips />
+    }
+  ];
+  
+  return (
+    <div className="min-h-screen bg-background">
+      <TopNav />
+      
+      {/* Hero Section */}
+      <section className="relative border-b overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-background"></div>
+        
+        {/* Background elements */}
+        <motion.div
+          className="absolute top-20 left-[15%] w-64 h-64 bg-blue-500/5 rounded-full blur-3xl"
+          animate={{
+            scale: [1, 1.2, 1],
+            opacity: [0.3, 0.2, 0.3],
+            transition: { duration: 8, repeat: Infinity }
+          }}
+        />
+        <motion.div 
+          className="absolute bottom-20 right-[10%] w-72 h-72 bg-primary/5 rounded-full blur-3xl"
+          animate={{
+            scale: [1, 1.3, 1],
+            opacity: [0.2, 0.3, 0.2],
+            transition: { duration: 10, repeat: Infinity, delay: 1 }
+          }}
+        />
+        
+        <div className="container relative z-10 py-20">
+          <div className="max-w-3xl mx-auto text-center">
+            <Badge variant="outline" className="px-4 py-1 text-sm backdrop-blur-sm bg-background/60 border-primary/40 mb-4">
+              <Zap className="h-3.5 w-3.5 mr-1 text-primary" />
+              <span>Free Browser-Based Focus Tools</span>
+            </Badge>
+            
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-6">
+              Powerful Focus Tools, <span className="text-primary">No Installation Required</span>
+            </h1>
+            
+            <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+              Enhance your focus and productivity with our suite of browser-based tools designed for ADHD support, distraction management, and deep work.
+            </p>
+            
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button size="lg" asChild className="group">
+                <Link to="/login?signup=true">
+                  Create Free Account
+                  <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </Link>
+              </Button>
+              <Button size="lg" variant="outline" asChild>
+                <Link to="/web-app">
+                  Explore Full Web App
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      {/* Tools Section */}
+      <section className="container py-12">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
+          {/* Tool Selection Sidebar */}
+          <div className="md:col-span-3">
+            <div className="space-y-1 sticky top-24">
+              <h2 className="text-xl font-semibold mb-4">Focus Tools</h2>
+              {toolsData.map(tool => (
+                <Button
+                  key={tool.id}
+                  variant={activeTab === tool.id ? "default" : "ghost"} 
+                  className={`w-full justify-start ${activeTab === tool.id ? '' : 'hover:bg-primary/5'}`}
+                  onClick={() => setActiveTab(tool.id)}
+                >
+                  <div className="flex items-center w-full">
+                    <div className={`mr-3 ${activeTab === tool.id ? "text-primary-foreground" : "text-primary"}`}>
+                      {tool.icon}
+                    </div>
+                    <div className="text-left">
+                      <div className="font-medium">{tool.title}</div>
+                    </div>
+                  </div>
+                </Button>
+              ))}
+              
+              <div className="pt-6 mt-6 border-t">
+                <Card className="bg-muted/50">
+                  <CardContent className="pt-6">
+                    <div className="flex items-start space-x-2">
+                      <Info className="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" />
+            <div>
+                        <h3 className="font-medium text-sm">Need more features?</h3>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          Our full app includes advanced features, progress tracking, and cloud sync.
+                        </p>
+                        <Button size="sm" variant="link" asChild className="mt-2 p-0">
+                          <Link to="/web-app" className="flex items-center">
+                            Explore Web App
+                            <ArrowRight className="ml-1 h-3 w-3" />
+                          </Link>
+              </Button>
+            </div>
+          </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+        </div>
+      
+          {/* Tool Display Area */}
+          <div className="md:col-span-9">
+            <div className="space-y-8">
+              {toolsData.map(tool => (
+                <div key={tool.id} className={activeTab === tool.id ? 'block' : 'hidden'}>
+                  <div className="mb-6">
+                    <h2 className="text-2xl font-bold flex items-center">
+                      <span className="bg-primary/10 p-2 rounded-full mr-3">
+                        {tool.icon}
+                      </span>
+                      {tool.title}
+                    </h2>
+                    <p className="text-muted-foreground mt-2">{tool.description}</p>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-4">
+                      {tool.features.map((feature, idx) => (
+                        <div key={idx} className="flex items-start space-x-2">
+                          <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                          <span className="text-sm">{feature}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  {/* Tool Component */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4 }}
+                  >
+                    {tool.component}
+                  </motion.div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      {/* Integration & Links */}
+      <section className="py-12 bg-muted/30 border-t">
+        <div className="container">
+          <div className="max-w-6xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <Card className="bg-card/50 border overflow-hidden">
+            <CardHeader>
+                  <CardTitle>Integration with Easier Focus</CardTitle>
+                  <CardDescription>
+                    These tools are even more powerful when connected to your Easier Focus account.
+                  </CardDescription>
+            </CardHeader>
+            <CardContent>
+                  <ul className="space-y-2">
+                    <li className="flex items-start space-x-2">
+                      <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                      <span>Save your pomodoro and task history</span>
+                    </li>
+                    <li className="flex items-start space-x-2">
+                      <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                      <span>Sync settings across devices</span>
+                    </li>
+                    <li className="flex items-start space-x-2">
+                      <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                      <span>Track focus analytics and patterns</span>
+                    </li>
+                    <li className="flex items-start space-x-2">
+                      <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                      <span>Access more advanced tools and features</span>
+                    </li>
+                  </ul>
+            </CardContent>
+                <CardFooter>
+                  <Button asChild>
+                    <Link to="/login?signup=true">Sign Up Free</Link>
+                  </Button>
+                </CardFooter>
+          </Card>
+              
+              <Card className="bg-card/50 border overflow-hidden">
+            <CardHeader>
+                  <CardTitle>More ADHD & Focus Resources</CardTitle>
+                  <CardDescription>
+                    Explore our comprehensive resources for improving focus and managing ADHD.
+                  </CardDescription>
+            </CardHeader>
+            <CardContent>
+                  <ul className="space-y-3">
+                    <li>
+                      <Link to="/blog/adhd-focus-techniques" className="flex items-center hover:text-primary transition-colors">
+                        <Brain className="h-4 w-4 mr-2 text-primary" />
+                        <span>ADHD Focus Techniques Guide</span>
+                        <ArrowRight className="ml-auto h-4 w-4 opacity-50" />
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/blog/pomodoro-adhd" className="flex items-center hover:text-primary transition-colors">
+                        <Clock className="h-4 w-4 mr-2 text-primary" />
+                        <span>Optimizing Pomodoro for ADHD</span>
+                        <ArrowRight className="ml-auto h-4 w-4 opacity-50" />
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/blog/ambient-noise-productivity" className="flex items-center hover:text-primary transition-colors">
+                        <Volume2 className="h-4 w-4 mr-2 text-primary" />
+                        <span>How Ambient Noise Boosts Productivity</span>
+                        <ArrowRight className="ml-auto h-4 w-4 opacity-50" />
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/blog/digital-distraction" className="flex items-center hover:text-primary transition-colors">
+                        <ZapOff className="h-4 w-4 mr-2 text-primary" />
+                        <span>Conquering Digital Distractions</span>
+                        <ArrowRight className="ml-auto h-4 w-4 opacity-50" />
+                      </Link>
+                    </li>
+                  </ul>
+            </CardContent>
+                <CardFooter>
+                  <Button variant="outline" asChild>
+                    <Link to="/blog">
+                      <Book className="h-4 w-4 mr-2" />
+                      Browse All Resources
+                    </Link>
+                  </Button>
+                </CardFooter>
+          </Card>
+        </div>
+        </div>
+        </div>
+      </section>
+    </div>
+  );
+};
+
+export default WebTools;
