@@ -7,11 +7,11 @@ import path from 'path';
 export default defineConfig({
   plugins: [react()],
   server: {
-    port: 6001,
-    strictPort: true, // Don't try other ports if 6001 is in use
+    port: 8080,
+    strictPort: true, // Don't try other ports if 8080 is in use
   },
   preview: {
-    port: 6001,
+    port: 8080,
     strictPort: true,
   },
   resolve: {
