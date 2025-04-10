@@ -4,30 +4,39 @@ import { createRoot } from 'react-dom/client';
 import App from './App';
 import './styles/globals.css';
 
-// Wrap the initialization in a function to ensure it runs after DOM is fully loaded
-function initializeApp() {
-  // Find the root element
-  const rootElement = document.getElementById('root');
-
-  // Check if element exists
-  if (!rootElement) {
-    console.error('Root element not found');
-  } else {
-    // Create a root
-    const root = createRoot(rootElement);
+// Define a clean initialization function to ensure proper setup
+function startApp() {
+  try {
+    const container = document.getElementById('root');
     
-    // Render the app
+    if (!container) {
+      console.error('Root element not found');
+      return;
+    }
+    
+    // Create root with error handling
+    const root = createRoot(container);
+    
+    // Render with error boundary
     root.render(
       <React.StrictMode>
         <App />
       </React.StrictMode>
     );
+    
+    console.log('Application successfully mounted');
+  } catch (error) {
+    console.error('Failed to initialize React application:', error);
   }
 }
 
-// Ensure the app initializes after the DOM is fully loaded
+// Use a more robust way to ensure DOM is ready
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initializeApp);
+  document.addEventListener('DOMContentLoaded', () => {
+    // Add a small delay to ensure all scripts are properly loaded
+    setTimeout(startApp, 50);
+  });
 } else {
-  initializeApp();
+  // Add a small delay for already loaded DOM
+  setTimeout(startApp, 50);
 }

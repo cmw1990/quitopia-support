@@ -10,7 +10,6 @@ const AppRouter: React.FC = () => {
       <Route path="/" element={<RootLayout />}>
         <Route index element={<GamesPage />} />
         <Route path="/games" element={<GamesPage />} />
-        <Route path="/app" element={<GamesPage />} />
       </Route>
     </Routes>
   );
