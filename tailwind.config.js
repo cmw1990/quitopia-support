@@ -50,7 +50,7 @@ module.exports = {
         sm: "calc(var(--radius) - 4px)",
       },
       borderColor: {
-        DEFAULT: 'hsl(var(--border))',
+        DEFAULT: "hsl(var(--border))",
       },
     },
   },
