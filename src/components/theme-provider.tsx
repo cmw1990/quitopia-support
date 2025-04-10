@@ -1,30 +1,22 @@
-import React, { createContext, useContext, useEffect, useState } from 'react'
-import { useTheme } from 'next-themes'
 
-interface ThemeProviderProps {
-  children: React.ReactNode
-  defaultTheme?: string
-  storageKey?: string
+import { createContext, useContext, useEffect, useState } from "react";
+import { type ThemeProviderProps } from "next-themes/dist/types";
+import { ThemeProvider as NextThemesProvider } from "next-themes";
+
+export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return <>{children}</>;
+  }
+
+  return <NextThemesProvider {...props}>{children}</NextThemesProvider>;
 }
 
-const ThemeProviderContext = createContext<ThemeProviderProps>({
-  children: null,
-  defaultTheme: 'system',
-  storageKey: 'vite-ui-theme'
-})
-
-export function ThemeProvider({ 
-  children, 
-  defaultTheme = 'system', 
-  storageKey = 'vite-ui-theme' 
-}: ThemeProviderProps) {
-  const { theme, setTheme } = useTheme()
-
-  return (
-    <ThemeProviderContext.Provider value={{ children, defaultTheme, storageKey }}>
-      {children}
-    </ThemeProviderContext.Provider>
-  )
-}
-
-export const useThemeContext = () => useContext(ThemeProviderContext)
+export const useTheme = () => {
+  return useContext(createContext(null));
+};
