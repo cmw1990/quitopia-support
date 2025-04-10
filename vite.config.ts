@@ -1,3 +1,4 @@
+
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import federation from '@originjs/vite-plugin-federation';
@@ -41,7 +42,7 @@ export default defineConfig({
     })
   ],
   server: {
-    port: 5001,
+    port: 8080,
     strictPort: false,
     cors: true,
     host: true,
@@ -77,4 +78,4 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src')
     }
   }
-}); 
+});
