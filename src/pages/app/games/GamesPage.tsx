@@ -3,6 +3,8 @@ import React from 'react';
 import { AmbientSoundPlayer } from '@/components/audio/AmbientSoundPlayer';
 
 const GamesPage: React.FC = () => {
+  console.log('GamesPage component rendering');
+  
   const ambientSounds = [
     { name: "Cafe Ambience", src: "/sounds/cafe.mp3" },
     { name: "Rainfall", src: "/sounds/rain.mp3" },

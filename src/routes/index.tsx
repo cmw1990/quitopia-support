@@ -22,6 +22,7 @@ const router = createBrowserRouter([
 ]);
 
 const AppRouter: React.FC = () => {
+  console.log('Router rendering');
   return <RouterProvider router={router} />;
 };
 

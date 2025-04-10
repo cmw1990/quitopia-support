@@ -177,7 +177,7 @@ const ToastDescription = React.forwardRef<
 ));
 ToastDescription.displayName = ToastPrimitive.Description.displayName;
 
-// Add the missing ToastViewport component
+// Make sure to export the ToastViewport component
 const ToastViewport = React.forwardRef<
   React.ElementRef<typeof ToastPrimitive.Viewport>,
   React.ComponentPropsWithoutRef<typeof ToastPrimitive.Viewport>
