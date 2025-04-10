@@ -85,4 +85,4 @@ export const careConnector = {
 // Helper for RPC calls
 export const rpc = (functionName: string, params?: any) => {
   return db.rpc(functionName, params, getSessionToken());
-}; 
+};

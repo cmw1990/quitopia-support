@@ -1,3 +1,4 @@
+
 import { auth } from '@/integrations/supabase/rest-api';
 import { useEffect, useState } from 'react';
 
@@ -10,8 +11,6 @@ const getSessionToken = () => {
     const parsedSession = JSON.parse(storedSession);
     
     // Handle different possible formats
-    
-    // Format 1: { currentSession: { access_token: "..." } }
     if (parsedSession?.currentSession?.access_token) {
       const token = parsedSession.currentSession.access_token;
       const expiresAt = parsedSession.currentSession.expires_at;
@@ -26,17 +25,14 @@ const getSessionToken = () => {
       return token;
     }
     
-    // Format 2: { access_token: "..." } (direct token object)
     if (parsedSession?.access_token) {
       return parsedSession.access_token;
     }
     
-    // No valid token format found
     console.warn('Invalid token format in localStorage');
     return null;
   } catch (error) {
     console.error('Error parsing auth token:', error);
-    // Clean up invalid token
     localStorage.removeItem('supabase.auth.token');
     return null;
   }
