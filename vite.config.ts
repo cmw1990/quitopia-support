@@ -1,3 +1,4 @@
+
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { resolve } from 'path'
@@ -29,7 +30,7 @@ export default defineConfig({
     chunkSizeWarningLimit: 1000,
   },
   server: {
-    port: 6001,
+    port: 8080,
     strictPort: true,
     host: true,
     watch: {
@@ -40,7 +41,7 @@ export default defineConfig({
     },
   },
   preview: {
-    port: 6001,
+    port: 8080,
     strictPort: true,
   }
 })
