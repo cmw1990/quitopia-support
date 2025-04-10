@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import * as ToastPrimitive from '@radix-ui/react-toast';
 import { cva, type VariantProps } from 'class-variance-authority';
@@ -176,11 +177,28 @@ const ToastDescription = React.forwardRef<
 ));
 ToastDescription.displayName = ToastPrimitive.Description.displayName;
 
+// Add the missing ToastViewport component
+const ToastViewport = React.forwardRef<
+  React.ElementRef<typeof ToastPrimitive.Viewport>,
+  React.ComponentPropsWithoutRef<typeof ToastPrimitive.Viewport>
+>(({ className, ...props }, ref) => (
+  <ToastPrimitive.Viewport
+    ref={ref}
+    className={cn(
+      'fixed bottom-0 right-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px]',
+      className
+    )}
+    {...props}
+  />
+));
+ToastViewport.displayName = ToastPrimitive.Viewport.displayName;
+
 export {
   Toast,
   ToastAction,
   ToastClose,
   ToastDescription,
   ToastProvider,
-  ToastTitle
+  ToastTitle,
+  ToastViewport
 };
