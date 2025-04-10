@@ -3,9 +3,10 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import federation from '@originjs/vite-plugin-federation';
 import path from 'path';
+import { componentTagger } from 'lovable-tagger';
 
 // https://vitejs.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [
     react({
       jsxRuntime: 'automatic',
@@ -23,6 +24,7 @@ export default defineConfig({
         ],
       },
     }),
+    mode === 'development' && componentTagger(),
     federation({
       name: 'missionFresh',
       filename: 'remoteEntry.js',
@@ -40,12 +42,12 @@ export default defineConfig({
       },
       shared: ['react', 'react-dom', 'react-router-dom']
     })
-  ],
+  ].filter(Boolean),
   server: {
     port: 8080,
     strictPort: false,
     cors: true,
-    host: true,
+    host: '::',
     hmr: {
       port: 5002,
     }
@@ -78,4 +80,4 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src')
     }
   }
-});
+}));
