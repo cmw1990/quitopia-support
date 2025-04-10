@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { DistractionAnalytics } from '@/components/focus/distraction/DistractionAnalytics';
 
 const DashboardPage: React.FC = () => {
   return (
@@ -40,8 +39,6 @@ const DashboardPage: React.FC = () => {
           </div>
         </div>
       </div>
-      
-      <DistractionAnalytics />
     </div>
   );
 };
