@@ -113,9 +113,10 @@ dist/
 /error-fix-reports/
 /health-check-results/
 *.log
-# JSON files (except package.json)
+# JSON files (except package.json and package-lock.json)
 *.json
 !package.json
+!package-lock.json
 *.png
 *.md
 *.txt
@@ -160,5 +161,4 @@ system_prompt_*.md
 vite
 .DS_Store
 check-console.js
-check-site.js
-package-lock.json # Ignoring lock file as yarn.lock exists 
+check-site.js 
